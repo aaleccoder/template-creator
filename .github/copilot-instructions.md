@@ -1,0 +1,1 @@
+This is a Nextjs application, that uses appwrite as its BAAS, and its purpose its to use GrapeJS as a web editor to create templates and save them to be able to create forms based on the data that the templates require in order to create different documents based on those templates. 
