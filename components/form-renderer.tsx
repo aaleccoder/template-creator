@@ -58,13 +58,50 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
     const stringifiedSchema = useMemo(() => JSON.stringify(schema), [schema]);
     const stringifiedInitialData = useMemo(() => JSON.stringify(initialData), [initialData]);
 
+    const normalizedFields: FormField[] = useMemo(() => {
+        try {
+            const s = JSON.parse(stringifiedSchema);
+            if (s && Array.isArray(s.fields)) {
+                return s.fields as FormField[];
+            }
+            if (s && typeof s === 'object') {
+                const entries = Object.entries(s).filter(([k, v]) => {
+                    return typeof v === 'object' && v !== null && 'type' in (v as any);
+                });
+                return entries.map(([name, def]: [string, any]) => ({
+                    name,
+                    label: def.label ?? name,
+                    type: def.type ?? 'text',
+                    required: def.required ?? false,
+                    placeholder: def.placeholder,
+                    options: def.options,
+                    itemFields: def.itemFields,
+                    format: def.format,
+                    pattern: def.pattern,
+                    min: def.min,
+                    max: def.max,
+                    minLength: def.minLength,
+                    maxLength: def.maxLength,
+                    integer: def.integer,
+                    step: def.step,
+                    acceptMime: def.acceptMime,
+                    maxSizeMB: def.maxSizeMB,
+                    minItems: def.minItems,
+                    maxItems: def.maxItems,
+                })) as FormField[];
+            }
+            return [];
+        } catch {
+            return [];
+        }
+    }, [stringifiedSchema]);
+
     useEffect(() => {
-        const parsedSchema = JSON.parse(stringifiedSchema);
         const parsedInitialData = JSON.parse(stringifiedInitialData);
     
         const initialFormState: { [key: string]: any } = {};
         const initialErrors: Record<string, string | null> = {};
-        parsedSchema.fields.forEach((field: FormField) => {
+        normalizedFields.forEach((field: FormField) => {
             if (parsedInitialData && parsedInitialData[field.name] !== undefined) {
                 initialFormState[field.name] = parsedInitialData[field.name];
             } else if (field.type === 'array') {
@@ -76,7 +113,7 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
         });
         setFormData(initialFormState);
         setErrors(initialErrors);
-    }, [stringifiedSchema, stringifiedInitialData]);
+    }, [stringifiedInitialData, normalizedFields]);
 
     // Helpers
     const isEmpty = (v: any) => v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
@@ -154,7 +191,7 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
     
     const handleInputChange = useCallback((key: string, value: any) => {
         // Find field by key for coercion and validation
-        const field = schema.fields.find(f => f.name === key);
+        const field = normalizedFields.find(f => f.name === key);
 
         let coerced = value;
         if (field && field.type === 'number') {
@@ -171,7 +208,7 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
             const err = validateField(field, coerced);
             setErrors(prev => ({ ...prev, [key]: err }));
         }
-    }, [schema.fields, validateField]);
+    }, [normalizedFields, validateField]);
 
     const handleArrayChange = useCallback((arrayKey: string, index: number, itemKey: string, value: string) => {
         setFormData(prevData => {
@@ -179,16 +216,16 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
             newArray[index] = { ...newArray[index], [itemKey]: value };
             return { ...prevData, [arrayKey]: newArray };
         });
-        const field = schema.fields.find(f => f.name === arrayKey);
+        const field = normalizedFields.find(f => f.name === arrayKey);
         if (field) {
             const current = (formData[arrayKey] || []).map((it: any, i: number) => i === index ? { ...it, [itemKey]: value } : it);
             const err = validateField(field, current);
             setErrors(prev => ({ ...prev, [arrayKey]: err }));
         }
-    }, [schema.fields, formData, validateField]);
+    }, [normalizedFields, formData, validateField]);
 
     const addArrayItem = useCallback((key: string) => {
-        const fieldSchema = schema.fields.find(f => f.name === key);
+        const fieldSchema = normalizedFields.find(f => f.name === key);
         const newItem = fieldSchema?.itemFields?.reduce((acc, field) => {
             acc[field.name] = '';
             return acc;
@@ -204,10 +241,10 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
                 [key]: updated
             };
         });
-    }, [schema.fields, validateField]);
+    }, [normalizedFields, validateField]);
 
     const removeArrayItem = useCallback((key: string, index: number) => {
-        const fieldSchema = schema.fields.find(f => f.name === key);
+        const fieldSchema = normalizedFields.find(f => f.name === key);
         setFormData(prevData => {
             const newArray = [...(prevData[key] || [])];
             newArray.splice(index, 1);
@@ -216,13 +253,13 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
             setErrors(e => ({ ...e, [key]: err }));
             return { ...prevData, [key]: newArray };
         });
-    }, [schema.fields, validateField]);
+    }, [normalizedFields, validateField]);
 
     const handleSubmit = useCallback((event: React.FormEvent) => {
         event.preventDefault();
         // Validate all fields on submit
         const newErrors: Record<string, string | null> = {};
-        for (const field of schema.fields) {
+        for (const field of normalizedFields) {
             const err = validateField(field, formData[field.name]);
             newErrors[field.name] = err;
         }
@@ -230,7 +267,7 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
         const hasError = Object.values(newErrors).some(Boolean);
         if (hasError) return;
         onSubmit(formData);
-    }, [formData, onSubmit, schema.fields, validateField]);
+    }, [formData, onSubmit, normalizedFields, validateField]);
 
     const renderField = useCallback((field: FormField) => {
         const key = field.name;
@@ -347,16 +384,16 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
 
     const canSubmit = useMemo(() => {
         // Recompute validity
-        for (const field of schema.fields) {
+        for (const field of normalizedFields) {
             const msg = validateField(field, formData[field.name]);
             if (msg) return false;
         }
         return true;
-    }, [schema.fields, formData, validateField]);
+    }, [normalizedFields, formData, validateField]);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {schema.fields.map(field => renderField(field))}
+            {normalizedFields.map(field => renderField(field))}
             <Button type="submit" disabled={!canSubmit}>{submitButtonText}</Button>
         </form>
     );
