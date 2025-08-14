@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        }
+    </style>
+</head>
+<body class="bg-white p-8">
+    <div style="max-width: 800px; margin: auto; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+
+        <!-- Encabezado con Logo y Título -->
+        <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e0; padding-bottom: 1rem; margin-bottom: 2rem;">
+            <div style="width: 150px;">
+                <img src="{{logoUrl}}" alt="Logo Empresa" style="max-width: 100%; height: auto;">
+            </div>
+            <h1 style="font-size: 1.875rem; font-weight: bold; color: #1a202c;">Ficha Técnica de Producto</h1>
+        </header>
+
+        <!-- Sección Principal: Imagen y Detalles Clave -->
+        <main style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+            <!-- Columna de la Imagen -->
+            <div style="width: 50%; text-align: center;">
+                <img src="{{productImageUrl}}" alt="Imagen del Producto" style="max-width: 100%; border-radius: 0.5rem; border: 1px solid #e2e8f0; object-fit: cover;">
+                <p style="font-size: 0.875rem; color: #718096; margin-top: 0.5rem;">SKU: {{sku}}</p>
+            </div>
+
+            <!-- Columna de Detalles -->
+            <div style="width: 50%;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem;">{{productName}}</h2>
+                <p style="color: #4a5568; margin-bottom: 1.5rem;">{{shortDescription}}</p>
+                
+                <div style="background-color: #f7fafc; border-radius: 0.375rem; padding: 1rem;">
+                    <p style="font-size: 1.25rem; font-weight: bold; color: #2d3748; margin-bottom: 0.5rem;">Precio: <span style="color: #2b6cb0;">{{price}}</span></p>
+                    <p style="font-size: 0.875rem; color: #4a5568;">Impuestos no incluidos. Válido hasta: {{validUntil}}</p>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <p style="font-weight: 600; color: #2d3748;">Categoría: <span style="font-weight: normal; color: #4a5568;">{{category}}</span></p>
+                    <p style="font-weight: 600; color: #2d3748;">Disponibilidad: <span style="font-weight: bold; color: #38a169;">{{availability}}</span></p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Descripción Larga y Especificaciones -->
+        <section>
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #2d3748; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1rem;">Descripción Detallada</h3>
+            <p style="color: #4a5568; margin-bottom: 2rem;">{{longDescription}}</p>
+
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #2d3748; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1rem;">Especificaciones Técnicas</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tbody>
+                    <!-- Filas generadas dinámicamente -->
+                    {{#each specifications}}
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 0.75rem 0.5rem; font-weight: 600; color: #2d3748; width: 30%;">{{this.specName}}</td>
+                        <td style="padding: 0.75rem 0.5rem; color: #4a5568;">{{this.specValue}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Pie de Página -->
+        <footer style="margin-top: 3rem; text-align: center; font-size: 0.875rem; color: #a0aec0; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+            <p>{{companyName}} - {{contactInfo}}</p>
+            <p>Documento generado el: {{generationDate}}</p>
+        </footer>
+
+    </div>
+</body>
+</html>

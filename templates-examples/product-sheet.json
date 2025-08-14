@@ -1,0 +1,121 @@
+{
+    "title": "Ficha de Producto",
+    "description": "Formulario para generar la ficha técnica de un producto.",
+    "fields": [
+        {
+            "name": "companyName",
+            "label": "Nombre de la Empresa",
+            "type": "text",
+            "required": true,
+            "placeholder": "Ej: Innovatech Solutions"
+        },
+        {
+            "name": "logoUrl",
+            "label": "URL del Logo de la Empresa",
+            "type": "image",
+            "required": true,
+            "placeholder": "https://ejemplo.com/logo.png"
+        },
+        {
+            "name": "contactInfo",
+            "label": "Información de Contacto",
+            "type": "text",
+            "required": true,
+            "placeholder": "info@innovatech.com | +1 234 567 890"
+        },
+        {
+            "name": "productName",
+            "label": "Nombre del Producto",
+            "type": "text",
+            "required": true,
+            "placeholder": "Ej: Monitor Curvo UltraWide 34\""
+        },
+        {
+            "name": "sku",
+            "label": "SKU del Producto",
+            "type": "text",
+            "required": true,
+            "placeholder": "Ej: IW-MON-34-CURV"
+        },
+        {
+            "name": "productImageUrl",
+            "label": "URL de la Imagen del Producto",
+            "type": "image",
+            "required": true,
+            "placeholder": "https://ejemplo.com/producto.jpg"
+        },
+        {
+            "name": "shortDescription",
+            "label": "Descripción Corta",
+            "type": "textarea",
+            "required": true,
+            "placeholder": "Una descripción breve y atractiva del producto."
+        },
+        {
+            "name": "longDescription",
+            "label": "Descripción Detallada",
+            "type": "textarea",
+            "required": true,
+            "placeholder": "Describa en detalle las características, ventajas y usos del producto."
+        },
+        {
+            "name": "category",
+            "label": "Categoría",
+            "type": "text",
+            "required": true,
+            "placeholder": "Ej: Monitores y Pantallas"
+        },
+        {
+            "name": "price",
+            "label": "Precio (USD)",
+            "type": "text",
+            "required": true,
+            "placeholder": "Ej: 499.99"
+        },
+        {
+            "name": "validUntil",
+            "label": "Oferta válida hasta",
+            "type": "date",
+            "required": false
+        },
+        {
+            "name": "availability",
+            "label": "Disponibilidad",
+            "type": "select",
+            "required": true,
+            "options": [
+                { "value": "In Stock", "label": "En Stock" },
+                { "value": "Out of Stock", "label": "Agotado" },
+                { "value": "Pre-order", "label": "Pre-venta" }
+            ]
+        },
+        {
+            "name": "specifications",
+            "label": "Especificaciones Técnicas",
+            "type": "array",
+            "required": true,
+            "itemFields": [
+                {
+                    "name": "specName",
+                    "label": "Característica",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Ej: Resolución"
+                },
+                {
+                    "name": "specValue",
+                    "label": "Valor",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Ej: 3440x1440"
+                }
+            ]
+        },
+        {
+            "name": "generationDate",
+            "label": "Fecha de Generación",
+            "type": "date",
+            "required": true
+        }
+    ]
+}
