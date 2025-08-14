@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Handlebars from "handlebars";
 
 // Tipos para nuestros datos
 interface TemplateData {
@@ -75,19 +76,13 @@ export default function TemplatePage({ params }: TemplatePageProps) {
 
   const handleFormSubmit = (formData: { [key: string]: any }) => {
     if (!template) return;
-    
-    setCurrentFormData(formData);
-    
-    let processedHtml = template.html;
 
-    for (const key in formData) {
-      if (Object.prototype.hasOwnProperty.call(formData, key)) {
-        const value = formData[key];
-        const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-        processedHtml = processedHtml.replace(placeholder, value);
-      }
-    }
-    
+    setCurrentFormData(formData);
+
+    // Compilar la plantilla con Handlebars para soportar {{#if}} y {{#each}}
+    const compile = Handlebars.compile(template.html);
+    const processedHtml = compile(formData);
+
     const finalHtml = `
       <style>${template.css}</style>
       ${processedHtml}

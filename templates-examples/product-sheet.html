@@ -16,7 +16,9 @@
         <!-- Encabezado con Logo y Título -->
         <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e0; padding-bottom: 1rem; margin-bottom: 2rem;">
             <div style="width: 150px;">
-                <img src="{{logoUrl}}" alt="Logo Empresa" style="max-width: 100%; height: auto;">
+                {{#if logoUrl}}
+                <img src="{{{logoUrl}}}" alt="Logo Empresa" style="max-width: 100%; height: auto;">
+                {{/if}}
             </div>
             <h1 style="font-size: 1.875rem; font-weight: bold; color: #1a202c;">Ficha Técnica de Producto</h1>
         </header>
@@ -25,32 +27,51 @@
         <main style="display: flex; gap: 2rem; margin-bottom: 2rem;">
             <!-- Columna de la Imagen -->
             <div style="width: 50%; text-align: center;">
-                <img src="{{productImageUrl}}" alt="Imagen del Producto" style="max-width: 100%; border-radius: 0.5rem; border: 1px solid #e2e8f0; object-fit: cover;">
+                {{#if productImageUrl}}
+                <img src="{{{productImageUrl}}}" alt="Imagen del Producto" style="max-width: 100%; border-radius: 0.5rem; border: 1px solid #e2e8f0; object-fit: cover;">
+                {{/if}}
+                {{#if sku}}
                 <p style="font-size: 0.875rem; color: #718096; margin-top: 0.5rem;">SKU: {{sku}}</p>
+                {{/if}}
             </div>
 
             <!-- Columna de Detalles -->
             <div style="width: 50%;">
+                {{#if productName}}
                 <h2 style="font-size: 1.5rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem;">{{productName}}</h2>
+                {{/if}}
+                {{#if shortDescription}}
                 <p style="color: #4a5568; margin-bottom: 1.5rem;">{{shortDescription}}</p>
+                {{/if}}
                 
                 <div style="background-color: #f7fafc; border-radius: 0.375rem; padding: 1rem;">
+                    {{#if price}}
                     <p style="font-size: 1.25rem; font-weight: bold; color: #2d3748; margin-bottom: 0.5rem;">Precio: <span style="color: #2b6cb0;">{{price}}</span></p>
+                    {{/if}}
+                    {{#if validUntil}}
                     <p style="font-size: 0.875rem; color: #4a5568;">Impuestos no incluidos. Válido hasta: {{validUntil}}</p>
+                    {{/if}}
                 </div>
 
                 <div style="margin-top: 1.5rem;">
+                    {{#if category}}
                     <p style="font-weight: 600; color: #2d3748;">Categoría: <span style="font-weight: normal; color: #4a5568;">{{category}}</span></p>
+                    {{/if}}
+                    {{#if availability}}
                     <p style="font-weight: 600; color: #2d3748;">Disponibilidad: <span style="font-weight: bold; color: #38a169;">{{availability}}</span></p>
+                    {{/if}}
                 </div>
             </div>
         </main>
 
         <!-- Descripción Larga y Especificaciones -->
         <section>
+            {{#if longDescription}}
             <h3 style="font-size: 1.25rem; font-weight: 600; color: #2d3748; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1rem;">Descripción Detallada</h3>
             <p style="color: #4a5568; margin-bottom: 2rem;">{{longDescription}}</p>
+            {{/if}}
 
+            {{#if specifications.length}}
             <h3 style="font-size: 1.25rem; font-weight: 600; color: #2d3748; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1rem;">Especificaciones Técnicas</h3>
             <table style="width: 100%; border-collapse: collapse;">
                 <tbody>
@@ -63,12 +84,19 @@
                     {{/each}}
                 </tbody>
             </table>
+            {{/if}}
         </section>
 
         <!-- Pie de Página -->
         <footer style="margin-top: 3rem; text-align: center; font-size: 0.875rem; color: #a0aec0; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
-            <p>{{companyName}} - {{contactInfo}}</p>
+            <p>
+                {{#if companyName}}{{companyName}}{{/if}}
+                {{#if companyName}}{{#if contactInfo}} - {{/if}}{{/if}}
+                {{#if contactInfo}}{{contactInfo}}{{/if}}
+            </p>
+            {{#if generationDate}}
             <p>Documento generado el: {{generationDate}}</p>
+            {{/if}}
         </footer>
 
     </div>

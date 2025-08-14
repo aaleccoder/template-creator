@@ -6,6 +6,7 @@ import FormRenderer from "@/components/form-renderer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Handlebars from "handlebars";
 
 // Tipos de datos que este componente espera recibir
 interface TemplateData {
@@ -38,16 +39,11 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
 
   const handleFormSubmit = (formData: { [key: string]: any }) => {
     setCurrentFormData(formData);
-    let processedHtml = initialTemplate.html;
 
-    for (const key in formData) {
-      if (Object.prototype.hasOwnProperty.call(formData, key)) {
-        const value = formData[key];
-        const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-        processedHtml = processedHtml.replace(placeholder, value);
-      }
-    }
-    
+    // Compilar la plantilla con Handlebars para soportar {{#if}} y {{#each}}
+    const compile = Handlebars.compile(initialTemplate.html);
+    const processedHtml = compile(formData);
+
     const finalHtml = `
       <style>${initialTemplate.css}</style>
       ${processedHtml}
