@@ -19,9 +19,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         // 1. Buscar si ya existe un asset para este documento
         let existingAsset;
         try {
-            existingAsset = await pb.collection('assets').getFirstListItem(`document = "${documentId}"`, {
-                filter: `owner = "${currentUser.id}"`
-            });
+            const filter = `document = "${documentId}" && owner = "${currentUser.id}" && usage = "generated_pdf"`;
+            existingAsset = await pb.collection('assets').getFirstListItem(filter, { sort: '-created' });
         } catch (error: any) {
             if (error.status !== 404) throw error;
         }

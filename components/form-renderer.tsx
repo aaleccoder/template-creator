@@ -137,7 +137,9 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
 
         return (
             <div key={key} className="grid w-full items-center gap-1.5">
-                <Label htmlFor={key}>{field.label}</Label>
+                {field.type !== 'image' && (
+                    <Label htmlFor={key}>{field.label}</Label>
+                )}
                 {
                     field.type === 'textarea' ? (
                         <Textarea
