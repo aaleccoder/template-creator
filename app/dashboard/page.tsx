@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/theme-toggle";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-// Definimos un tipo para los datos de la plantilla para mayor seguridad de tipos
 interface Template {
   id: string;
   name: string;
@@ -90,6 +89,9 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold">Dashboard de Plantillas</h1>
         <div className="flex items-center gap-4">
           <ModeToggle />
+          <Link href="/documents">
+            <Button variant="outline">Documentos</Button>
+          </Link>
           <Button onClick={handleLogout}>Cerrar Sesión</Button>
         </div>
       </header>

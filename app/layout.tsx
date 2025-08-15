@@ -2,6 +2,18 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarInset,
+  SidebarHeader,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton
+} from "@/components/ui/sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +46,34 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <SidebarProvider>
+            <div className="flex h-screen">
+              <Sidebar>
+                <SidebarHeader>
+                  <SidebarGroup>
+                    <SidebarGroupLabel>Navegación</SidebarGroupLabel>
+                    <SidebarContent>
+                      <SidebarMenu>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild isActive={false}>
+                            <a href="/dashboard">Plantillas</a>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild isActive={false}>
+                            <a href="/documents">Documentos</a>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </SidebarMenu>
+                    </SidebarContent>
+                  </SidebarGroup>
+                </SidebarHeader>
+              </Sidebar>
+              <SidebarInset>
+                {children}
+              </SidebarInset>
+            </div>
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>
