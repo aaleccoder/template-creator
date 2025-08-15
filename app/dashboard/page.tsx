@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from 'next/link';
-import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/theme-toggle";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Template {
   id: string;
@@ -16,7 +14,6 @@ interface Template {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,22 +38,24 @@ export default function DashboardPage() {
     fetchTemplates();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('/api/auth/logout', { method: 'POST' });
-      if (response.ok) {
-        router.push('/');
-      } else {
-        alert('Error al cerrar sesión.');
-      }
-    } catch (error) {
-      alert('Ocurrió un error inesperado.');
-    }
-  };
 
   const renderContent = () => {
     if (loading) {
-      return <p>Cargando plantillas...</p>;
+      return (
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="flex flex-col h-full">
+                <CardHeader className="flex-grow">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </div>
+      );
     }
 
     if (error) {
@@ -68,35 +67,28 @@ export default function DashboardPage() {
     }
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {templates.map((template) => (
-          <Link href={`/templates/${template.id}`} key={template.id}>
-            <Card className="hover:border-primary transition-colors duration-200 cursor-pointer">
-              <CardHeader>
-                <CardTitle>{template.name}</CardTitle>
-                <CardDescription>{template.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {templates.map((template) => (
+            <Link href={`/templates/${template.id}`} key={template.id} passHref>
+              <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+                <CardHeader className="flex-grow">
+                  <CardTitle className="text-lg font-semibold mb-2">{template.name}</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground line-clamp-3">
+                    {template.description}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="font-sans flex flex-col h-screen bg-background">
-      <header className="flex justify-between items-center w-full p-4 border-b">
-        <h1 className="text-2xl font-bold">Dashboard de Plantillas</h1>
-        <div className="flex items-center gap-4">
-          <ModeToggle />
-          <Link href="/documents">
-            <Button variant="outline">Documentos</Button>
-          </Link>
-          <Button onClick={handleLogout}>Cerrar Sesión</Button>
-        </div>
-      </header>
-      <main className="flex-1 p-8 overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4">Plantillas Disponibles</h2>
+    <div className="flex flex-col h-full">
+      <main className="flex-1 p-6 overflow-y-auto">
         {renderContent()}
       </main>
     </div>

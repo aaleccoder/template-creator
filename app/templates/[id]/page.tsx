@@ -8,8 +8,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Handlebars from "handlebars";
-
-// Tipos para nuestros datos
+import { Clipboard, FilePenLine, Trash2 } from 'lucide-react';
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from 'sonner';
 interface TemplateData {
   id: string;
   name: string;
@@ -40,6 +41,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
   const [view, setView] = useState<'list' | 'form'>('list');
   const [currentFormData, setCurrentFormData] = useState<{ [key: string]: any } | null>(null);
   const [newDocumentName, setNewDocumentName] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -93,15 +95,16 @@ export default function TemplatePage({ params }: TemplatePageProps) {
 
   const handleSaveDocument = async () => {
     if (!template || !currentFormData || !previewHtml) {
-        alert("Faltan datos para guardar el documento.");
+        toast.error("Faltan datos para guardar el documento.");
         return;
     }
     
     if (!newDocumentName.trim()) {
-        alert("El nombre del documento no puede estar vacío.");
+        toast.error("El nombre del documento no puede estar vacío.");
         return;
     }
 
+    setSaving(true);
     try {
         const response = await fetch('/api/documents', {
             method: 'POST',
@@ -121,16 +124,27 @@ export default function TemplatePage({ params }: TemplatePageProps) {
             throw new Error(errorData.message || 'Error al guardar el documento.');
         }
 
-        alert('Documento guardado con éxito!');
+        toast.success('Documento guardado con éxito!');
         setPreviewHtml(null);
         setView('list');
         
     } catch (err: any) {
-        alert(`Error: ${err.message}`);
+        toast.error(`Error: ${err.message}`);
+    } finally {
+       setSaving(false);
     }
   };
   
-  const handleDelete = async (docId: string) => {
+  const handleCopy = (e: React.MouseEvent, url: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(url);
+    toast.success('Link copied to clipboard!');
+  };
+
+  const handleDelete = async (e: React.MouseEvent, docId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!confirm("¿Estás seguro de que quieres borrar este documento? Esta acción no se puede deshacer.")) {
         return;
     }
@@ -146,15 +160,33 @@ export default function TemplatePage({ params }: TemplatePageProps) {
         }
         
         setDocuments(documents.filter(doc => doc.id !== docId));
-        alert("Documento borrado con éxito.");
+        toast.success("Documento borrado con éxito.");
 
     } catch (err: any) {
-        alert(`Error: ${err.message}`);
+        toast.error(`Error: ${err.message}`);
     }
   };
 
   const renderDocumentList = () => {
-    if (loading) return <p>Cargando documentos...</p>;
+    if (loading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="flex flex-col">
+              <CardHeader className="flex-grow">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full mt-2" />
+              </CardHeader>
+              <CardFooter className="flex justify-end items-center gap-2">
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-8 w-8" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      );
+    }
     if (error) return <p className="text-destructive">Error: {error}</p>;
 
     if (documents.length === 0) {
@@ -167,32 +199,71 @@ export default function TemplatePage({ params }: TemplatePageProps) {
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {documents.map(doc => (
-            <Card key={doc.id} className="flex flex-col justify-between">
-                <Link href={`/api/documents/${doc.id}/pdf`} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
-                    <CardHeader>
-                        <CardTitle className="truncate">{doc.name}</CardTitle>
-                        <CardDescription>
-                        Creado: {new Date(doc.created).toLocaleDateString()}
-                        </CardDescription>
-                    </CardHeader>
-                </Link>
-                <CardFooter className="flex justify-end gap-2 p-4">
-                    <Link href={`/documents/${doc.id}/edit`} passHref>
-                        <Button variant="outline" size="sm">Editar</Button>
-                    </Link>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(doc.id)}>
-                        Borrar
+        {documents.map(doc => {
+          const pdfUrl = `/api/documents/${doc.id}/pdf`;
+          return (
+            <Link key={doc.id} href={pdfUrl} target="_blank" rel="noopener noreferrer" className="block">
+              <Card className="hover:border-primary transition-colors duration-200 flex flex-col h-full">
+                <CardHeader className="flex-grow">
+                  <CardTitle className="truncate">{doc.name}</CardTitle>
+                  <CardDescription>
+                    Creado: {new Date(doc.created).toLocaleDateString()}
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter className="flex justify-end items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => handleCopy(e, window.location.origin + pdfUrl)}
+                        title="Copy Link"
+                        className="cursor-pointer"
+                    >
+                        <Clipboard className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        title="Edit"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/documents/${doc.id}/edit`; }}
+                        className="cursor-pointer"
+                    >
+                        <FilePenLine className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={(e) => handleDelete(e, doc.id)}
+                        title="Delete"
+                        className="cursor-pointer"
+                    >
+                        <Trash2 className="h-4 w-4" />
                     </Button>
                 </CardFooter>
-            </Card>
-        ))}
+              </Card>
+            </Link>
+          )
+        })}
       </div>
     );
   }
 
   const renderFormView = () => {
-    if (loading) return <p className="text-center p-12">Cargando plantilla...</p>;
+    if (loading) {
+      return (
+        <div className="mt-8 max-w-2xl mx-auto space-y-6">
+          <Skeleton className="h-8 w-1/2" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-8 w-1/3" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-8 w-1/4" />
+          <Skeleton className="h-32 w-full" />
+          <div className="flex justify-end gap-2">
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+      );
+    }
     if (error) return <p className="text-destructive text-center p-12">Error: {error}</p>;
     if (!template) return <p className="text-center p-12">No se encontró la plantilla.</p>;
     
@@ -205,8 +276,8 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                     <Button variant="secondary" onClick={() => setPreviewHtml(null)}>
                         Volver al Formulario
                     </Button>
-                    <Button onClick={handleSaveDocument}>
-                        Guardar Documento
+                    <Button onClick={handleSaveDocument} disabled={saving}>
+                        {saving ? 'Guardando...' : 'Guardar Documento'}
                     </Button>
                 </div>
             </div>

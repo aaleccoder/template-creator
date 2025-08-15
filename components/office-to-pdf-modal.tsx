@@ -2,15 +2,30 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { FileUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import Link from 'next/link';
 
-export function OfficeToPdfModal({ onCreated }: { onCreated?: () => void }) {
+interface Document {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export function OfficeToPdfModal({
+  onCreated,
+  document,
+  children,
+}: {
+  onCreated?: () => void;
+  document?: Document | null;
+  children?: React.ReactNode;
+}) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState(document?.title || '');
+  const [description, setDescription] = useState(document?.description || '');
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +40,13 @@ export function OfficeToPdfModal({ onCreated }: { onCreated?: () => void }) {
   };
 
   const handleConvert = async () => {
-    if (!selectedFile || !title.trim()) {
-      setError('Por favor, seleccione un archivo y complete el título.');
+    if (!selectedFile && !document) {
+      setError('Por favor, seleccione un archivo.');
       return;
+    }
+    if (!title.trim()) {
+        setError('Por favor, complete el título.');
+        return;
     }
 
     setLoading(true);
@@ -35,12 +54,17 @@ export function OfficeToPdfModal({ onCreated }: { onCreated?: () => void }) {
     setPdfUrl(null);
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    if (selectedFile) {
+        formData.append('file', selectedFile);
+    }
     formData.append('title', title);
     formData.append('description', description);
 
     try {
-      const response = await fetch('/api/convert/office-to-pdf', {
+        const url = document
+            ? `/api/documents/${document.id}/replace`
+            : '/api/convert/office-to-pdf';
+      const response = await fetch(url, {
         method: 'POST',
         body: formData,
       });
@@ -63,8 +87,8 @@ export function OfficeToPdfModal({ onCreated }: { onCreated?: () => void }) {
   
   const resetState = () => {
     setSelectedFile(null);
-    setTitle('');
-    setDescription('');
+    setTitle(document?.title || '');
+    setDescription(document?.description || '');
     setPdfUrl(null);
     setLoading(false);
     setError(null);
@@ -78,11 +102,11 @@ export function OfficeToPdfModal({ onCreated }: { onCreated?: () => void }) {
       }
     }}>
       <DialogTrigger asChild>
-        <Button variant="outline">Convertir Office a PDF</Button>
+        {children || <Button variant="outline">{document ? 'Editar Documento' : <><FileUp className="mr-2 h-4 w-4" /> Agregar documento</>}</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Convertidor de Office a PDF</DialogTitle>
+          <DialogTitle>{document ? 'Editar Documento' : 'Convertidor de Office a PDF'}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -134,10 +158,10 @@ export function OfficeToPdfModal({ onCreated }: { onCreated?: () => void }) {
         <DialogFooter>
           <Button
             onClick={handleConvert}
-            disabled={!selectedFile || loading}
+            disabled={(!selectedFile && !document) || loading}
             className="w-full"
           >
-            {loading ? 'Convirtiendo...' : 'Convertir a PDF'}
+            {loading ? 'Guardando...' : 'Guardar Cambios'}
           </Button>
         </DialogFooter>
       </DialogContent>

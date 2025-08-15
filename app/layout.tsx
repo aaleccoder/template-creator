@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from 'sonner';
 import {
   Sidebar,
   SidebarProvider,
@@ -14,6 +16,8 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar";
+import { usePathname } from "next/navigation";
+import { Header } from "@/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,16 +29,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Creador de Plantillas",
-  description: "Crea plantillas de documentos y formularios dinámicos.",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+
   return (
     <html lang="es" suppressHydrationWarning>
       <body
@@ -47,7 +48,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SidebarProvider>
-            <div className="flex h-screen">
+            <div className="flex h-screen w-full">
               <Sidebar>
                 <SidebarHeader>
                   <SidebarGroup>
@@ -55,12 +56,12 @@ export default function RootLayout({
                     <SidebarContent>
                       <SidebarMenu>
                         <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={false}>
+                          <SidebarMenuButton asChild isActive={pathname.startsWith('/dashboard')}>
                             <a href="/dashboard">Plantillas</a>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                         <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={false}>
+                          <SidebarMenuButton asChild isActive={pathname.startsWith('/documents')}>
                             <a href="/documents">Documentos</a>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -70,10 +71,14 @@ export default function RootLayout({
                 </SidebarHeader>
               </Sidebar>
               <SidebarInset>
-                {children}
+                <Header />
+                <main className="w-full h-full overflow-auto">
+                  {children}
+                </main>
               </SidebarInset>
             </div>
           </SidebarProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -56,6 +56,22 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const body = await request.json();
     const { data, rendered_html, name } = body;
 
+    // Before updating the document, check for and delete any existing generated PDF asset
+    // associated with this document. This forces regeneration on next PDF request.
+    try {
+      const existingPdfAssets = await pb.collection('assets').getFullList({
+        filter: `document = "${id}" && usage = "generated_pdf"`,
+      });
+
+      for (const asset of existingPdfAssets) {
+        await pb.collection('assets').delete(asset.id);
+        console.log(`Deleted old PDF asset: ${asset.id} for document ${id}`);
+      }
+    } catch (assetError) {
+      // Log the error but don't prevent document update if asset deletion fails
+      console.warn(`Could not delete old PDF assets for document ${id}:`, assetError);
+    }
+
     const updatedRecord = await pb.collection('generated_documents').update(id, {
       data,
       rendered_html,
