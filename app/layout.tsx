@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/header";
+import { DynamicBreadcrumb } from "@/components/dynamic-breadcrumb";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,7 +50,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SidebarProvider>
-            <div className="flex h-screen w-full">
+            <div className="flex h-screen w-full ">
               <Sidebar>
                 <SidebarHeader>
                   <SidebarGroup>
@@ -57,7 +59,7 @@ export default function RootLayout({
                       <SidebarMenu>
                         <SidebarMenuItem>
                           <SidebarMenuButton asChild isActive={pathname.startsWith('/dashboard')}>
-                            <a href="/dashboard">Plantillas</a>
+                            <a href="/templates">Plantillas</a>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                         <SidebarMenuItem>
@@ -72,7 +74,8 @@ export default function RootLayout({
               </Sidebar>
               <SidebarInset>
                 <Header />
-                <main className="w-full h-full overflow-auto">
+                  <DynamicBreadcrumb />
+                <main className="w-full h-full overflow-auto md:p-8 p-2 space-y-4">
                   {children}
                 </main>
               </SidebarInset>

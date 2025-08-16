@@ -67,7 +67,7 @@ export default function DashboardPage() {
     }
 
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {templates.map((template) => (
             <Link href={`/templates/${template.id}`} key={template.id} passHref>
@@ -88,7 +88,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
         {renderContent()}
       </main>
     </div>

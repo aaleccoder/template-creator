@@ -149,8 +149,7 @@ export default function DocumentsPage() {
 
   return (
     <div className="font-sans flex flex-col h-screen bg-background">
-      <header className="flex justify-between items-center w-full p-4 border-b">
-        <h1 className="text-2xl font-bold">Documentos</h1>
+      <header className="flex justify-end items-center w-full">
         <OfficeToPdfModal onCreated={loadDocuments}>
             <Button>
                 <FileUp className="mr-2 h-4 w-4" />
@@ -158,7 +157,7 @@ export default function DocumentsPage() {
             </Button>
         </OfficeToPdfModal>
       </header>
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto mt-4">
         {renderContent()}
       </main>
     </div>

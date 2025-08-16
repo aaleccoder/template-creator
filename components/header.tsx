@@ -23,7 +23,7 @@ export function Header() {
   };
 
   return (
-    <header className="flex justify-between items-center p-4 border-b">
+    <header className="flex justify-between items-center border-b md:p-4 p-2">
       <div className="flex items-center gap-4">
         <Button variant="ghost" onClick={toggleSidebar}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

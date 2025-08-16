@@ -11,6 +11,7 @@ import Handlebars from "handlebars";
 import { Clipboard, FilePenLine, Trash2 } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
+
 interface TemplateData {
   id: string;
   name: string;
@@ -139,7 +140,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
     e.preventDefault();
     e.stopPropagation();
     navigator.clipboard.writeText(url);
-    toast.success('Link copied to clipboard!');
+    toast.success('¡Enlace copiado al portapapeles!');
   };
 
   const handleDelete = async (e: React.MouseEvent, docId: string) => {
@@ -224,7 +225,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                         variant="outline"
                         size="icon"
                         title="Edit"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/documents/${doc.id}/edit`; }}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/templates/${template?.id}/documents/${doc.id}/edit`; }}
                         className="cursor-pointer"
                     >
                         <FilePenLine className="h-4 w-4" />
@@ -309,10 +310,9 @@ export default function TemplatePage({ params }: TemplatePageProps) {
   }
 
   return (
-      <div className="container mx-auto p-4 md:p-8">
+      <div className="container mx-auto">
         <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-2xl font-bold">{template ? template.name : 'Cargando...'}</h1>
               <p className="text-muted-foreground mt-1">
                 {template ? template.description : 'Cargando descripción...'}
               </p>
