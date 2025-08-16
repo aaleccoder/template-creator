@@ -27,7 +27,6 @@ export default function ImageUploader({
     const isMimeAllowed = (file: File, accept: string) => {
         if (!accept) return true;
         const m = (file.type || '').toLowerCase();
-        // Wildcard support for image/*
         const parts = accept.split(',').map(s => s.trim().toLowerCase());
         return parts.some(p => {
             if (p.endsWith('/*')) {
@@ -44,7 +43,6 @@ export default function ImageUploader({
 
         setError(null);
 
-        // Client-side validations
         if (!isMimeAllowed(file, acceptMime)) {
             setError('Tipo de archivo no permitido. Seleccione una imagen válida.');
             return;

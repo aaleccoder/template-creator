@@ -61,7 +61,6 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     const body = await request.json();
     const { data, rendered_html, name } = body;
 
-    // Delete old generated PDF assets
     try {
       const existingPdfAssets = await pb.collection('assets').getFullList({
         filter: `document = "${id}" && usage = "generated_pdf"`,

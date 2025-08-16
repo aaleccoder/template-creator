@@ -37,7 +37,6 @@ export default function EditDocumentPage() {
   const router = useRouter();
   const params = useParams();
   const documentId = params.documentId as string;
-  // This is a client component, so we need to fetch the data in a useEffect
   const [document, setDocument] = useState<DocumentData | null>(null);
   const [template, setTemplate] = useState<TemplateData | null>(null);
   const [loading, setLoading] = useState(true);

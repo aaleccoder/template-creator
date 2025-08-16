@@ -12,12 +12,8 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({ 
       ...authData,
-      // The session token is handled by the PocketBase SDK.
-      // We are just returning the user data.
     });
 
-    // The PocketBase SDK manages the cookie automatically.
-    // We need to pass the cookie from the PocketBase instance to the browser.
     response.headers.set('set-cookie', pb.authStore.exportToCookie());
 
     return response;
@@ -29,7 +25,7 @@ export async function POST(request: NextRequest) {
         status: 'error',
         message: error.message || 'An unexpected error occurred.',
       }),
-      { status: 401 } // Use 401 for unauthorized errors
+      { status: 401 }
     );
   }
 }

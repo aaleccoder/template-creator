@@ -13,7 +13,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Gotenberg endpoint not configured.' }, { status: 500 });
   }
 
-  // Cargar autenticación desde cookies para asociar registros al usuario actual
   pb.authStore.loadFromCookie(request.headers.get('cookie') || '');
 
   if (!pb.authStore.isValid) {
@@ -35,7 +34,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "El campo 'title' es requerido." }, { status: 400 });
     }
 
-    // Convert Blob to Buffer for Gotenberg
     const fileBuffer = Buffer.from(await officeFile.arrayBuffer());
 
     const gotenbergFormData = new FormData();
@@ -55,7 +53,6 @@ export async function POST(request: NextRequest) {
     const pdfBlob = await gotenbergResponse.blob();
     const pdfBuffer = Buffer.from(await pdfBlob.arrayBuffer());
 
-    // Guardar el PDF en la colección 'assets' de PocketBase
     const pbFormData = new FormData();
     pbFormData.append('file', new Blob([pdfBuffer], { type: 'application/pdf' }), `${officeFile.name}.pdf`);
     pbFormData.append('usage', 'converted_office_pdf');
@@ -65,22 +62,19 @@ export async function POST(request: NextRequest) {
 
     const assetRecord = await pb.collection('assets').create(pbFormData);
 
-    // Crear registro en la colección 'documents' enlazando el asset (PDF)
     const documentRecord = await pb.collection('documents').create({
       title,
       description,
       file: assetRecord.id,
     });
 
-    // Enlazar (opcional) el asset con el documento creado
     try {
       await pb.collection('assets').update(assetRecord.id, { document: documentRecord.id });
     } catch (linkErr) {
       console.warn('No se pudo enlazar asset->document:', linkErr);
     }
 
-    // Obtener URL pública del PDF
-    const pdfUrl = pb.getFileUrl(assetRecord, assetRecord.file);
+    const pdfUrl = pb.files.getURL(assetRecord, assetRecord.file);
 
     return NextResponse.json(
       { success: true, pdfUrl, assetId: assetRecord.id, documentId: documentRecord.id },

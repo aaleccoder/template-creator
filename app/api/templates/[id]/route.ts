@@ -16,7 +16,6 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 
   } catch (error) {
     console.error(`Error fetching template with ID: ${id}`, error);
-    // PocketBase throws an error with status 404 if not found
     if (error && typeof error === 'object' && 'status' in error) {
         const status = (error as any).status;
         if (status === 404) {

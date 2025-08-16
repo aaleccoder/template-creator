@@ -1,10 +1,4 @@
-/**
- * Genera un buffer de PDF a partir de una cadena de HTML utilizando Gotenberg.
- * @param html El contenido HTML completo para convertir a PDF.
- * @returns Una promesa que se resuelve con el buffer del PDF como un Uint8Array.
- */
 export async function generatePdfFromHtml(html: string): Promise<Uint8Array> {
-  // Resolver URL de Gotenberg desde variables de entorno
   const gotenbergUrl =
     (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_GOTENBERG_URL) ||
     (typeof process !== 'undefined' && process.env.GOTENBERG_URL) ||
@@ -18,7 +12,6 @@ export async function generatePdfFromHtml(html: string): Promise<Uint8Array> {
 
   try {
     const base = gotenbergUrl.replace(/\/+$/, '');
-    // Usar FormData/Blob globales (Node 18+ / Next.js) sin dependencias extra
     const form = new (globalThis as any).FormData();
     const blob = new (globalThis as any).Blob([html], { type: 'text/html' });
     form.append('files', blob, 'index.html');

@@ -7,7 +7,6 @@ export async function POST(request: NextRequest) {
 
     const response = new NextResponse(JSON.stringify({ status: 'success' }));
 
-    // Clear the session cookie
     response.cookies.set('pb_auth', '', {
       path: '/',
       httpOnly: true,

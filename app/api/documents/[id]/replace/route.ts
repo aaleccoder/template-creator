@@ -1,4 +1,3 @@
-// app/api/documents/[id]/replace/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import pb from '@/lib/pocketbase';
 
@@ -35,13 +34,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       return NextResponse.json({ error: "The 'title' field is required." }, { status: 400 });
     }
 
-    // Fetch the existing document to get the asset ID
     const existingDocument = await pb.collection('documents').getOne(documentId);
     if (!existingDocument) {
       return NextResponse.json({ error: 'Document not found.' }, { status: 404 });
     }
 
-    // Convert Blob to Buffer for Gotenberg
     const fileBuffer = Buffer.from(await officeFile.arrayBuffer());
 
     const gotenbergFormData = new FormData();
@@ -64,13 +61,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     const pdfBlob = await gotenbergResponse.blob();
     const pdfBuffer = Buffer.from(await pdfBlob.arrayBuffer());
 
-    // Update the existing asset in PocketBase
     const pbFormData = new FormData();
     pbFormData.append('file', new Blob([pdfBuffer], { type: 'application/pdf' }), `${officeFile.name}.pdf`);
 
     const updatedAssetRecord = await pb.collection('assets').update(existingDocument.file, pbFormData);
 
-    // Update the document's title and description
     await pb.collection('documents').update(documentId, {
       title,
       description,

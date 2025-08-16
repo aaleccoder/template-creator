@@ -6,7 +6,6 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   const { id: documentId } = await context.params;
 
   try {
-    // --- 1. Autenticar la petición ---
     pb.authStore.loadFromCookie(request.headers.get('cookie') || '');
     if (!pb.authStore.isValid) {
       return NextResponse.json({ message: 'No autorizado.' }, { status: 401 });
@@ -17,7 +16,6 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       return NextResponse.json({ message: 'Usuario no encontrado.' }, { status: 401 });
     }
 
-    // --- 2. Buscar si ya existe un asset para este documento ---
     let existingAsset;
     try {
       const filter = `document = "${documentId}" && owner = "${currentUser.id}" && usage = "generated_pdf"`;
@@ -31,7 +29,6 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       return NextResponse.redirect(fileUrl.toString());
     }
 
-    // --- 3. Si no existe, lo generamos ---
     const document = await pb.collection('generated_documents').getOne(documentId);
 
     if (document.owner !== currentUser.id) {
@@ -41,7 +38,6 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     const pdfUint8Array = await generatePdfFromHtml(document.rendered_html);
     const pdfBuffer = Buffer.from(pdfUint8Array);
 
-    // --- 4. Crear el asset en PocketBase ---
     const formData = new FormData();
     const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
 

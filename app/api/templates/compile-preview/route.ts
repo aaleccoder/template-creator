@@ -9,7 +9,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Template HTML or data is missing.' }, { status: 400 });
     }
 
-    // Register a helper to safely output JSON stringified content for debugging or other purposes
     Handlebars.registerHelper('json', function(context) {
         return JSON.stringify(context);
     });

@@ -54,7 +54,6 @@ export default function AuthPage() {
         }),
       })
       if (response.ok) {
-        // Optionally log the user in directly after registration
         await handleLoginAfterRegister(registerEmail, registerPassword)
       } else {
         const error = await response.json()
@@ -74,7 +73,7 @@ export default function AuthPage() {
             body: JSON.stringify({ email, password }),
         });
         if (response.ok) {
-            router.push("/editor");
+            router.push("/dashboard");
         } else {
             alert("Registro exitoso, pero el inicio de sesión automático falló. Por favor, inicie sesión manualmente.");
         }
