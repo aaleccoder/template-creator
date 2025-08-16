@@ -1,15 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import pb from '@/lib/pocketbase';
-
-type RouteContext = {
-  params: {
-    id: string;
-  };
-};
-
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
   try {
-    const id = context.params.id;
     if (!id) {
       return NextResponse.json(
         { message: 'Template ID is required.' },
@@ -22,13 +15,13 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json(record);
 
   } catch (error) {
-    console.error(`Error fetching template with ID: ${context.params.id}`, error);
+    console.error(`Error fetching template with ID: ${id}`, error);
     // PocketBase throws an error with status 404 if not found
     if (error && typeof error === 'object' && 'status' in error) {
         const status = (error as any).status;
         if (status === 404) {
              return NextResponse.json(
-                { message: `Template with ID '${context.params.id}' not found.` },
+                { message: `Template with ID '${id}' not found.` },
                 { status: 404 }
             );
         }

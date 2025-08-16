@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
   }
 
-  const currentUser = pb.authStore.model;
+  const currentUser = pb.authStore.record;
 
   try {
     const formData = await request.formData();

@@ -5,9 +5,17 @@ import Link from "next/link";
 import FormRenderer from "@/components/form-renderer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Handlebars from "handlebars";
 import { Clipboard, FilePenLine, Trash2 } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
@@ -43,6 +51,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
   const [currentFormData, setCurrentFormData] = useState<{ [key: string]: any } | null>(null);
   const [newDocumentName, setNewDocumentName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [docToDelete, setDocToDelete] = useState<GeneratedDocument | null>(null);
 
   const fetchData = async () => {
     try {
@@ -77,21 +86,34 @@ export default function TemplatePage({ params }: TemplatePageProps) {
     fetchData();
   }, [params, view]);
 
-  const handleFormSubmit = (formData: { [key: string]: any }) => {
+  const handleFormSubmit = async (formData: { [key: string]: any }) => {
     if (!template) return;
 
     setCurrentFormData(formData);
+    setSaving(true);
+    try {
+      const response = await fetch('/api/templates/compile-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          html: template.html,
+          css: template.css,
+          data: formData,
+        }),
+      });
 
-    // Compilar la plantilla con Handlebars para soportar {{#if}} y {{#each}}
-    const compile = Handlebars.compile(template.html);
-    const processedHtml = compile(formData);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al generar la vista previa.');
+      }
 
-    const finalHtml = `
-      <style>${template.css}</style>
-      ${processedHtml}
-    `;
-
-    setPreviewHtml(finalHtml);
+      const { previewHtml } = await response.json();
+      setPreviewHtml(previewHtml);
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSaveDocument = async () => {
@@ -143,15 +165,11 @@ export default function TemplatePage({ params }: TemplatePageProps) {
     toast.success('¡Enlace copiado al portapapeles!');
   };
 
-  const handleDelete = async (e: React.MouseEvent, docId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!confirm("¿Estás seguro de que quieres borrar este documento? Esta acción no se puede deshacer.")) {
-        return;
-    }
+  const handleDelete = async (doc: GeneratedDocument) => {
+    if (!doc) return;
 
     try {
-        const response = await fetch(`/api/documents/${docId}`, {
+        const response = await fetch(`/api/documents/${doc.id}`, {
             method: 'DELETE',
         });
 
@@ -160,11 +178,13 @@ export default function TemplatePage({ params }: TemplatePageProps) {
             throw new Error(errorData.message || 'Error al borrar el documento.');
         }
         
-        setDocuments(documents.filter(doc => doc.id !== docId));
+        setDocuments(documents.filter(d => d.id !== doc.id));
         toast.success("Documento borrado con éxito.");
 
     } catch (err: any) {
         toast.error(`Error: ${err.message}`);
+    } finally {
+        setDocToDelete(null);
     }
   };
 
@@ -225,7 +245,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                         variant="outline"
                         size="icon"
                         title="Edit"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/templates/${template?.id}/documents/${doc.id}/edit`; }}
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/templates/${template?.id}/${doc.id}/edit`; }}
                         className="cursor-pointer"
                     >
                         <FilePenLine className="h-4 w-4" />
@@ -233,7 +253,11 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                     <Button
                         variant="destructive"
                         size="icon"
-                        onClick={(e) => handleDelete(e, doc.id)}
+                        onClick={(e) => {
+                           e.preventDefault();
+                           e.stopPropagation();
+                           setDocToDelete(doc);
+                        }}
                         title="Delete"
                         className="cursor-pointer"
                     >
@@ -245,8 +269,8 @@ export default function TemplatePage({ params }: TemplatePageProps) {
           )
         })}
       </div>
-    );
-  }
+   );
+ }
 
   const renderFormView = () => {
     if (loading) {
@@ -327,9 +351,26 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                 <h2 className="text-xl font-semibold mb-4">Documentos Creados</h2>
                 {renderDocumentList()}
             </div>
-        ) : (
-            renderFormView()
-        )}
-    </div>
-  );
+       ) : (
+           renderFormView()
+       )}
+
+       {docToDelete && (
+           <Dialog open={!!docToDelete} onOpenChange={() => setDocToDelete(null)}>
+               <DialogContent>
+                   <DialogHeader>
+                       <DialogTitle>Confirmar Borrado</DialogTitle>
+                       <DialogDescription>
+                           ¿Estás seguro de que quieres borrar el documento <strong>{docToDelete.name}</strong>? Esta acción no se puede deshacer.
+                       </DialogDescription>
+                   </DialogHeader>
+                   <DialogFooter>
+                       <Button variant="secondary" onClick={() => setDocToDelete(null)}>Cancelar</Button>
+                       <Button variant="destructive" onClick={() => handleDelete(docToDelete)}>Borrar</Button>
+                   </DialogFooter>
+               </DialogContent>
+           </Dialog>
+       )}
+   </div>
+ );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { FileUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -30,7 +31,6 @@ export function OfficeToPdfModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedFile(event.target.files[0]);
@@ -76,6 +76,7 @@ export function OfficeToPdfModal({
 
       const data = await response.json();
       setPdfUrl(data.pdfUrl);
+      toast.success('¡Documento actualizado con éxito!');
       // Notificar al padre para refrescar el listado de documentos
       onCreated?.();
     } catch (err: any) {
@@ -158,7 +159,7 @@ export function OfficeToPdfModal({
         <DialogFooter>
           <Button
             onClick={handleConvert}
-            disabled={(!selectedFile && !document) || loading}
+            disabled={!selectedFile || loading}
             className="w-full"
           >
             {loading ? 'Guardando...' : 'Guardar Cambios'}

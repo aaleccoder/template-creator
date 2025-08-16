@@ -31,7 +31,7 @@ export default function AuthPage() {
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       })
       if (response.ok) {
-        router.push("/editor") // Redirect to editor on successful login
+        router.push("/dashboard")
       } else {
         const error = await response.json()
         alert(`Error al iniciar sesión: ${error.message}`)

@@ -58,7 +58,12 @@ export default function RootLayout({
                     <SidebarContent>
                       <SidebarMenu>
                         <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={pathname.startsWith('/dashboard')}>
+                          <SidebarMenuButton asChild isActive={pathname === '/dashboard'}>
+                            <a href="/dashboard">Dashboard</a>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild isActive={pathname.startsWith('/templates')}>
                             <a href="/templates">Plantillas</a>
                           </SidebarMenuButton>
                         </SidebarMenuItem>

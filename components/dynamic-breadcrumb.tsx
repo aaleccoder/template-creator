@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/breadcrumb';
 
 const breadcrumbTranslations: { [key: string]: string } = {
-  dashboard: 'Plantillas',
+  dashboard: 'Dashboard',
   templates: 'Plantillas',
   documents: 'Documentos',
   edit: 'Editar',

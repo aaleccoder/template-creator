@@ -106,7 +106,7 @@ export default function DocumentsPage() {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {documents.map((doc) => (
-          <Link key={doc.id} href={doc.pdfUrl || '#'} target="_blank" rel="noopener noreferrer" className="block">
+          <div key={doc.id} onClick={() => window.open(doc.pdfUrl || '#', '_blank')} className="block cursor-pointer">
             <Card className="hover:border-primary transition-colors duration-200 flex flex-col h-full">
               <CardHeader className="flex-grow">
                 <CardTitle className="truncate">{doc.title}</CardTitle>
@@ -123,7 +123,7 @@ export default function DocumentsPage() {
                   >
                       <Clipboard className="h-4 w-4" />
                   </Button>
-                  <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                  <div onClick={(e) => e.stopPropagation()}>
                     <OfficeToPdfModal onCreated={loadDocuments} document={doc}>
                         <Button variant="outline" size="icon" title="Edit" className="cursor-pointer">
                             <FilePenLine className="h-4 w-4" />
@@ -141,7 +141,7 @@ export default function DocumentsPage() {
                   </Button>
               </CardFooter>
             </Card>
-          </Link>
+          </div>
         ))}
       </div>
     );

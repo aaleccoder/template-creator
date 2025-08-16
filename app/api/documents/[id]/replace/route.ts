@@ -8,7 +8,7 @@ if (!GOTENBERG_ENDPOINT) {
   console.error('NEXT_PUBLIC_GOTENBERG_ENDPOINT environment variable is not set.');
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   if (!GOTENBERG_ENDPOINT) {
     return NextResponse.json({ error: 'Gotenberg endpoint not configured.' }, { status: 500 });
   }
@@ -19,8 +19,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
 
-  const currentUser = pb.authStore.model;
-  const documentId = params.id;
+  const currentUser = pb.authStore.record;
+  const { id: documentId } = await context.params;
 
   try {
     const formData = await request.formData();
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: 'No file provided.' }, { status: 400 });
     }
     if (!title) {
-        return NextResponse.json({ error: "The 'title' field is required." }, { status: 400 });
+      return NextResponse.json({ error: "The 'title' field is required." }, { status: 400 });
     }
 
     // Fetch the existing document to get the asset ID
@@ -55,7 +55,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (!gotenbergResponse.ok) {
       const errorText = await gotenbergResponse.text();
       console.error('Gotenberg conversion failed:', errorText);
-      return NextResponse.json({ error: `PDF conversion failed: ${errorText}` }, { status: gotenbergResponse.status });
+      return NextResponse.json(
+        { error: `PDF conversion failed: ${errorText}` },
+        { status: gotenbergResponse.status }
+      );
     }
 
     const pdfBlob = await gotenbergResponse.blob();
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     // Update the existing asset in PocketBase
     const pbFormData = new FormData();
     pbFormData.append('file', new Blob([pdfBuffer], { type: 'application/pdf' }), `${officeFile.name}.pdf`);
-   
+
     const updatedAssetRecord = await pb.collection('assets').update(existingDocument.file, pbFormData);
 
     // Update the document's title and description
@@ -73,10 +76,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       description,
     });
 
-    const pdfUrl = pb.getFileUrl(updatedAssetRecord, updatedAssetRecord.file);
+    const pdfUrl = pb.files.getURL(updatedAssetRecord, updatedAssetRecord.file);
 
     return NextResponse.json(
-      { success: true, pdfUrl, assetId: updatedAssetRecord.id, documentId: documentId },
+      { success: true, pdfUrl, assetId: updatedAssetRecord.id, documentId },
       { status: 200 }
     );
 
