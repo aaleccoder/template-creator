@@ -1,20 +1,34 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { isAuthenticated } from './lib/auth';
 
-export function middleware(request: NextRequest) {
-  const sessionCookie = request.cookies.get('pb_auth');
+export async function middleware(request: NextRequest) {
+  const isAuth = await isAuthenticated(request);
+  const isLoginPage = request.nextUrl.pathname === '/';
 
-  if (request.nextUrl.pathname.startsWith('/dashboard') && !sessionCookie) {
-    return NextResponse.redirect(new URL('/', request.url))
+  if (isLoginPage) {
+    if (isAuth) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next();
   }
 
-  if (request.nextUrl.pathname === '/' && sessionCookie) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+  if (!isAuth) {
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next()
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api/files|_next/static|_next/image|favicon.ico).*)',
+  ],
 }

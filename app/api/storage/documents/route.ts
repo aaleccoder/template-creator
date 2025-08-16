@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'No autorizado.' }, { status: 401 });
     }
 
-    const currentUser = pb.authStore.model;
+    const currentUser = pb.authStore.record;
 
     const records = await pb.collection('documents').getFullList({
       sort: '-created',
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     const result = records.map((doc: any) => {
       const asset = doc.expand?.file;
-      const pdfUrl = asset ? pb.getFileUrl(asset, asset.file) : null;
+      const pdfUrl = asset ? pb.files.getURL(asset, asset.file) : null;
 
       return {
         id: doc.id,

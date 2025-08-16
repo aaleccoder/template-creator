@@ -11,7 +11,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       return NextResponse.json({ message: 'No autorizado.' }, { status: 401 });
     }
 
-    const currentUser = pb.authStore.model;
+    const currentUser = pb.authStore.record;
     if (!currentUser) {
       return NextResponse.json({ message: 'Usuario no encontrado.' }, { status: 401 });
     }
@@ -49,7 +49,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 
     const newAsset = await pb.collection('assets').create(formData);
 
-    const newFileUrl = pb.getFileUrl(newAsset, newAsset.file);
+    const newFileUrl = pb.files.getURL(newAsset, newAsset.file);
     return NextResponse.redirect(newFileUrl.toString());
 
   } catch (error: any) {
