@@ -37,6 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const isAuthPage = pathname === "/";
 
   return (
     <html lang="es" suppressHydrationWarning>
@@ -49,43 +50,56 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <div className="flex h-screen w-full ">
-              <Sidebar>
-                <SidebarHeader>
-                  <SidebarGroup>
-                    <SidebarGroupLabel>Navegación</SidebarGroupLabel>
-                    <SidebarContent>
-                      <SidebarMenu>
-                        <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={pathname === '/dashboard'}>
-                            <a href="/dashboard">Dashboard</a>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={pathname.startsWith('/templates')}>
-                            <a href="/templates">Plantillas</a>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                          <SidebarMenuButton asChild isActive={pathname.startsWith('/documents')}>
-                            <a href="/documents">Documentos</a>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      </SidebarMenu>
-                    </SidebarContent>
-                  </SidebarGroup>
-                </SidebarHeader>
-              </Sidebar>
-              <SidebarInset>
-                <Header />
+          {isAuthPage ? (
+            <>{children}</>
+          ) : (
+            <SidebarProvider>
+              <div className="flex h-screen w-full ">
+                <Sidebar>
+                  <SidebarHeader>
+                    <SidebarGroup>
+                      <SidebarGroupLabel>Navegación</SidebarGroupLabel>
+                      <SidebarContent>
+                        <SidebarMenu>
+                          <SidebarMenuItem>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={pathname === "/dashboard"}
+                            >
+                              <a href="/dashboard">Dashboard</a>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                          <SidebarMenuItem>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={pathname.startsWith("/templates")}
+                            >
+                              <a href="/templates">Plantillas</a>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                          <SidebarMenuItem>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={pathname.startsWith("/documents")}
+                            >
+                              <a href="/documents">Documentos</a>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        </SidebarMenu>
+                      </SidebarContent>
+                    </SidebarGroup>
+                  </SidebarHeader>
+                </Sidebar>
+                <SidebarInset>
+                  <Header />
                   <DynamicBreadcrumb />
-                <main className="w-full h-full overflow-auto md:p-8 p-2 space-y-4">
-                  {children}
-                </main>
-              </SidebarInset>
-            </div>
-          </SidebarProvider>
+                  <main className="w-full h-full overflow-auto md:p-8 p-2 space-y-4">
+                    {children}
+                  </main>
+                </SidebarInset>
+              </div>
+            </SidebarProvider>
+          )}
           <Toaster />
         </ThemeProvider>
       </body>
