@@ -13,13 +13,13 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching recent documents:', error);
     if (error && typeof error === 'object' && 'status' in error) {
-        const status = (error as any).status;
-        return NextResponse.json(
-            { message: 'An error occurred while fetching recent documents.', error: (error as any).message },
-            { status }
-        );
+      const status = (error as any).status;
+      return NextResponse.json(
+        { message: 'An error occurred while fetching recent documents.', error: (error as any).message },
+        { status }
+      );
     }
-    
+
     return NextResponse.json(
       { message: 'An unexpected error occurred.' },
       { status: 500 }

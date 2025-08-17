@@ -60,6 +60,7 @@ export default function ImageUploader({
         try {
             const response = await fetch('/api/assets', {
                 method: 'POST',
+                credentials: 'include', // Ensure cookies are sent with the request
                 body: formData,
             });
 

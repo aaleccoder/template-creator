@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Login successful, session created.');
 
-    const response = NextResponse.json({ 
+    const response = NextResponse.json({
       ...authData,
     });
 

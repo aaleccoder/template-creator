@@ -5,9 +5,18 @@ import { OfficeToPdfModal } from "@/components/office-to-pdf-modal";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
-import { Clipboard, FilePenLine, Trash2, FileUp } from 'lucide-react';
+import { Clipboard, FilePenLine, Trash2, FileUp, Loader2 } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface Document {
   id: string;
@@ -23,6 +32,9 @@ export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleCopy = (e: React.MouseEvent, url: string) => {
     e.preventDefault();
@@ -31,15 +43,19 @@ export default function DocumentsPage() {
     toast.success('¡Vínculo copiado al portapapeles!');
   };
 
-  const handleDelete = async (e: React.MouseEvent, documentId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, doc: Document) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm('¿Estás seguro que deseas borrar este documento?')) {
-      return;
-    }
+    setDocumentToDelete(doc);
+    setShowDeleteConfirm(true);
+  };
 
+  const handleDelete = async () => {
+    if (!documentToDelete) return;
+
+    setIsDeleting(true);
     try {
-      const response = await fetch(`/api/storage/documents/${documentId}`, {
+      const response = await fetch(`/api/storage/documents/${documentToDelete.id}`, {
         method: 'DELETE',
       });
 
@@ -51,6 +67,10 @@ export default function DocumentsPage() {
       loadDocuments(); // Refresh the list
     } catch (err: any) {
       toast.error(err.message || 'Ocurrió un error.');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setDocumentToDelete(null);
     }
   };
 
@@ -133,7 +153,7 @@ export default function DocumentsPage() {
                   <Button
                       variant="destructive"
                       size="icon"
-                      onClick={(e) => handleDelete(e, doc.id)}
+                      onClick={(e) => handleDeleteClick(e, doc)}
                       title="Delete"
                       className="cursor-pointer"
                   >
@@ -148,18 +168,40 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="font-sans flex flex-col h-screen bg-background">
-      <header className="flex justify-end items-center w-full">
-        <OfficeToPdfModal onCreated={loadDocuments}>
-            <Button>
-                <FileUp className="mr-2 h-4 w-4" />
-                Convertir Office a PDF
-            </Button>
-        </OfficeToPdfModal>
-      </header>
-      <main className="flex-1 overflow-y-auto mt-4">
-        {renderContent()}
-      </main>
-    </div>
+    <>
+      <div className="font-sans flex flex-col h-screen bg-background">
+        <header className="flex justify-end items-center w-full">
+          <OfficeToPdfModal onCreated={loadDocuments}>
+              <Button>
+                  <FileUp className="mr-2 h-4 w-4" />
+                  Convertir Office a PDF
+              </Button>
+          </OfficeToPdfModal>
+        </header>
+        <main className="flex-1 overflow-y-auto mt-4">
+          {renderContent()}
+        </main>
+      </div>
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>¿Estás seguro que deseas borrar este documento?</DialogTitle>
+                <DialogDescription>
+                    Esta acción no se puede deshacer. Esto borrará permanentemente el documento.
+                    {documentToDelete && <span className="font-bold block mt-2">{documentToDelete.title}</span>}
+                </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button variant="outline" disabled={isDeleting}>Cancelar</Button>
+                </DialogClose>
+                <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isDeleting ? 'Borrando...' : 'Borrar'}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

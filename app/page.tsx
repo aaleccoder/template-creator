@@ -30,6 +30,7 @@ export default function AuthPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       })
+      console.log(response);
       if (response.ok) {
         router.push("/dashboard")
       } else {
@@ -67,18 +68,18 @@ export default function AuthPage() {
 
   const handleLoginAfterRegister = async (email: string, password: string) => {
     try {
-        const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-        if (response.ok) {
-            router.push("/dashboard");
-        } else {
-            alert("Registro exitoso, pero el inicio de sesión automático falló. Por favor, inicie sesión manualmente.");
-        }
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (response.ok) {
+        router.push("/dashboard");
+      } else {
+        alert("Registro exitoso, pero el inicio de sesión automático falló. Por favor, inicie sesión manualmente.");
+      }
     } catch (error) {
-        alert("Ocurrió un error inesperado durante el inicio de sesión automático.");
+      alert("Ocurrió un error inesperado durante el inicio de sesión automático.");
     }
   };
 

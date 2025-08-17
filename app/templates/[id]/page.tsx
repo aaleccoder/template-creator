@@ -13,9 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Clipboard, FilePenLine, Trash2 } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
@@ -48,10 +50,12 @@ export default function TemplatePage({ params }: TemplatePageProps) {
   const [error, setError] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [view, setView] = useState<'list' | 'form'>('list');
-  const [currentFormData, setCurrentFormData] = useState<{ [key: string]: any } | null>(null);
+  const [currentFormData, setCurrentFormData] = useState<{ [key: string]: any } | null>({});
   const [newDocumentName, setNewDocumentName] = useState('');
   const [saving, setSaving] = useState(false);
   const [docToDelete, setDocToDelete] = useState<GeneratedDocument | null>(null);
+  const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
+  const [jsonData, setJsonData] = useState("");
 
   const fetchData = async () => {
     try {
@@ -188,6 +192,22 @@ export default function TemplatePage({ params }: TemplatePageProps) {
     }
   };
 
+  const handleLoadJson = () => {
+    if (!jsonData) {
+        toast.error("El JSON no puede estar vacío.");
+        return;
+    }
+    try {
+      const parsedData = JSON.parse(jsonData);
+      setCurrentFormData(parsedData);
+      setJsonData("");
+      setIsJsonModalOpen(false);
+      toast.success("Datos cargados desde JSON correctamente.")
+    } catch (error) {
+      toast.error("JSON inválido. Por favor, comprueba la sintaxis.");
+    }
+  };
+
   const renderDocumentList = () => {
     if (loading) {
       return (
@@ -320,7 +340,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
 
     return (
       <div className="mt-8 max-w-2xl mx-auto">
-        <div className="space-y-2 mb-8">
+        <div className="space-y-2 mb-4">
             <Label htmlFor="newDocName">Nombre del Nuevo Documento</Label>
             <Input 
                 id="newDocName"
@@ -328,7 +348,40 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                 onChange={(e) => setNewDocumentName(e.target.value)}
             />
         </div>
-        <FormRenderer schema={template.schema} onSubmit={handleFormSubmit} />
+
+        <div className="mb-8">
+            <Dialog open={isJsonModalOpen} onOpenChange={setIsJsonModalOpen}>
+                <DialogTrigger asChild>
+                    <Button variant="outline">Rellenar desde JSON</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                        <DialogTitle>Rellenar desde JSON</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <p className="text-sm text-muted-foreground">
+                            Pega el contenido de un archivo JSON para pre-rellenar el formulario. La estructura del JSON debe coincidir con los nombres (`name`) de los campos definidos en el schema de la plantilla.
+                        </p>
+                        <Textarea
+                            placeholder='{ "campo1": "valor1", "campo2": 123 }'
+                            value={jsonData}
+                            onChange={(e) => setJsonData(e.target.value)}
+                            className="min-h-[200px] font-mono"
+                        />
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                                Cancelar
+                            </Button>
+                        </DialogClose>
+                        <Button type="button" onClick={handleLoadJson}>Cargar Datos</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+
+        <FormRenderer schema={template.schema} initialData={currentFormData || {}} onSubmit={handleFormSubmit} />
       </div>
     );
   }

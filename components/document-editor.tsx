@@ -7,6 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Handlebars from "handlebars";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 // Tipos de datos que este componente espera recibir
 interface TemplateData {
@@ -36,6 +46,23 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
   const [currentFormData, setCurrentFormData] = useState(initialDocument.data);
   const [documentName, setDocumentName] = useState(initialDocument.name);
   const [isSaving, setIsSaving] = useState(false);
+  const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
+  const [jsonData, setJsonData] = useState("");
+
+  const handleLoadJson = () => {
+    if (!jsonData) {
+        alert("El JSON no puede estar vacío.");
+        return;
+    }
+    try {
+      const parsedData = JSON.parse(jsonData);
+      setCurrentFormData(parsedData);
+      setJsonData("");
+      setIsJsonModalOpen(false);
+    } catch (error) {
+      alert("JSON inválido. Por favor, comprueba la sintaxis.");
+    }
+  };
 
   const handleFormSubmit = (formData: { [key: string]: any }) => {
     setCurrentFormData(formData);
@@ -108,7 +135,7 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
 
   return (
     <div className="mt-8 max-w-2xl mx-auto">
-        <div className="space-y-2 mb-8">
+        <div className="space-y-2 mb-4">
             <Label htmlFor="docName">Nombre del Documento</Label>
             <Input 
                 id="docName"
@@ -116,6 +143,39 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
                 onChange={(e) => setDocumentName(e.target.value)}
             />
         </div>
+
+        <div className="mb-8">
+            <Dialog open={isJsonModalOpen} onOpenChange={setIsJsonModalOpen}>
+                <DialogTrigger asChild>
+                    <Button variant="outline">Rellenar desde JSON</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                        <DialogTitle>Rellenar desde JSON</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <p className="text-sm text-muted-foreground">
+                            Pega el contenido de un archivo JSON para pre-rellenar el formulario. La estructura del JSON debe coincidir con los nombres (`name`) de los campos definidos en el schema de la plantilla.
+                        </p>
+                        <Textarea
+                            placeholder='{ "campo1": "valor1", "campo2": 123 }'
+                            value={jsonData}
+                            onChange={(e) => setJsonData(e.target.value)}
+                            className="min-h-[200px] font-mono"
+                        />
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                                Cancelar
+                            </Button>
+                        </DialogClose>
+                        <Button type="button" onClick={handleLoadJson}>Cargar Datos</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
+
         <FormRenderer 
             schema={initialTemplate.schema}
             initialData={currentFormData}
