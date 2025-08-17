@@ -122,46 +122,46 @@ export default function TemplatePage({ params }: TemplatePageProps) {
 
   const handleSaveDocument = async () => {
     if (!template || !currentFormData || !previewHtml) {
-        toast.error("Faltan datos para guardar el documento.");
-        return;
+      toast.error("Faltan datos para guardar el documento.");
+      return;
     }
-    
+
     if (!newDocumentName.trim()) {
-        toast.error("El nombre del documento no puede estar vacío.");
-        return;
+      toast.error("El nombre del documento no puede estar vacío.");
+      return;
     }
 
     setSaving(true);
     try {
-        const response = await fetch('/api/documents', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: newDocumentName,
-                template: template.id,
-                data: currentFormData,
-                rendered_html: previewHtml,
-            }),
-        });
+      const response = await fetch('/api/documents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newDocumentName,
+          template: template.id,
+          data: currentFormData,
+          rendered_html: previewHtml,
+        }),
+      });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al guardar el documento.');
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al guardar el documento.');
+      }
 
-        toast.success('Documento guardado con éxito!');
-        setPreviewHtml(null);
-        setView('list');
-        
+      toast.success('Documento guardado con éxito!');
+      setPreviewHtml(null);
+      setView('list');
+
     } catch (err: any) {
-        toast.error(`Error: ${err.message}`);
+      toast.error(`Error: ${err.message}`);
     } finally {
-       setSaving(false);
+      setSaving(false);
     }
   };
-  
+
   const handleCopy = (e: React.MouseEvent, url: string) => {
     e.preventDefault();
     e.stopPropagation();
@@ -173,29 +173,29 @@ export default function TemplatePage({ params }: TemplatePageProps) {
     if (!doc) return;
 
     try {
-        const response = await fetch(`/api/documents/${doc.id}`, {
-            method: 'DELETE',
-        });
+      const response = await fetch(`/api/documents/${doc.id}`, {
+        method: 'DELETE',
+      });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al borrar el documento.');
-        }
-        
-        setDocuments(documents.filter(d => d.id !== doc.id));
-        toast.success("Documento borrado con éxito.");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al borrar el documento.');
+      }
+
+      setDocuments(documents.filter(d => d.id !== doc.id));
+      toast.success("Documento borrado con éxito.");
 
     } catch (err: any) {
-        toast.error(`Error: ${err.message}`);
+      toast.error(`Error: ${err.message}`);
     } finally {
-        setDocToDelete(null);
+      setDocToDelete(null);
     }
   };
 
   const handleLoadJson = () => {
     if (!jsonData) {
-        toast.error("El JSON no puede estar vacío.");
-        return;
+      toast.error("El JSON no puede estar vacío.");
+      return;
     }
     try {
       const parsedData = JSON.parse(jsonData);
@@ -252,45 +252,45 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter className="flex justify-end items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={(e) => handleCopy(e, window.location.origin + pdfUrl)}
-                        title="Copy Link"
-                        className="cursor-pointer"
-                    >
-                        <Clipboard className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        title="Edit"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/templates/${template?.id}/${doc.id}/edit`; }}
-                        className="cursor-pointer"
-                    >
-                        <FilePenLine className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={(e) => {
-                           e.preventDefault();
-                           e.stopPropagation();
-                           setDocToDelete(doc);
-                        }}
-                        title="Delete"
-                        className="cursor-pointer"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => handleCopy(e, window.location.origin + pdfUrl)}
+                    title="Copy Link"
+                    className="cursor-pointer"
+                  >
+                    <Clipboard className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    title="Edit"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/templates/${template?.id}/${doc.id}/edit`; }}
+                    className="cursor-pointer"
+                  >
+                    <FilePenLine className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setDocToDelete(doc);
+                    }}
+                    title="Delete"
+                    className="cursor-pointer"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </CardFooter>
               </Card>
             </Link>
           )
         })}
       </div>
-   );
- }
+    );
+  }
 
   const renderFormView = () => {
     if (loading) {
@@ -311,29 +311,29 @@ export default function TemplatePage({ params }: TemplatePageProps) {
     }
     if (error) return <p className="text-destructive text-center p-12">Error: {error}</p>;
     if (!template) return <p className="text-center p-12">No se encontró la plantilla.</p>;
-    
+
     if (previewHtml) {
-        return (
-          <div className="mt-6">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Vista Previa del Documento</h2>
-                <div className="flex gap-2">
-                    <Button variant="secondary" onClick={() => setPreviewHtml(null)}>
-                        Volver al Formulario
-                    </Button>
-                    <Button onClick={handleSaveDocument} disabled={saving}>
-                        {saving ? 'Guardando...' : 'Guardar Documento'}
-                    </Button>
-                </div>
+      return (
+        <div className="mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Vista Previa del Documento</h2>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={() => setPreviewHtml(null)}>
+                Volver al Formulario
+              </Button>
+              <Button onClick={handleSaveDocument} disabled={saving}>
+                {saving ? 'Guardando...' : 'Guardar Documento'}
+              </Button>
             </div>
-            <div
-              className="border rounded-lg p-4 bg-white text-black"
-              dangerouslySetInnerHTML={{ __html: previewHtml }}
-            />
           </div>
-        );
+          <div
+            className="border rounded-lg p-4 bg-white text-black"
+            dangerouslySetInnerHTML={{ __html: previewHtml }}
+          />
+        </div>
+      );
     }
-    
+
     if (!template.schema || Object.keys(template.schema).length === 0) {
       return <p className="text-center p-12">Esta plantilla no tiene campos configurados para rellenar.</p>;
     }
@@ -341,44 +341,44 @@ export default function TemplatePage({ params }: TemplatePageProps) {
     return (
       <div className="mt-8 max-w-2xl mx-auto">
         <div className="space-y-2 mb-4">
-            <Label htmlFor="newDocName">Nombre del Nuevo Documento</Label>
-            <Input 
-                id="newDocName"
-                value={newDocumentName}
-                onChange={(e) => setNewDocumentName(e.target.value)}
-            />
+          <Label htmlFor="newDocName">Nombre del Nuevo Documento</Label>
+          <Input
+            id="newDocName"
+            value={newDocumentName}
+            onChange={(e) => setNewDocumentName(e.target.value)}
+          />
         </div>
 
         <div className="mb-8">
-            <Dialog open={isJsonModalOpen} onOpenChange={setIsJsonModalOpen}>
-                <DialogTrigger asChild>
-                    <Button variant="outline">Rellenar desde JSON</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[600px]">
-                    <DialogHeader>
-                        <DialogTitle>Rellenar desde JSON</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <p className="text-sm text-muted-foreground">
-                            Pega el contenido de un archivo JSON para pre-rellenar el formulario. La estructura del JSON debe coincidir con los nombres (`name`) de los campos definidos en el schema de la plantilla.
-                        </p>
-                        <Textarea
-                            placeholder='{ "campo1": "valor1", "campo2": 123 }'
-                            value={jsonData}
-                            onChange={(e) => setJsonData(e.target.value)}
-                            className="min-h-[200px] font-mono"
-                        />
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button type="button" variant="secondary">
-                                Cancelar
-                            </Button>
-                        </DialogClose>
-                        <Button type="button" onClick={handleLoadJson}>Cargar Datos</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+          <Dialog open={isJsonModalOpen} onOpenChange={setIsJsonModalOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Rellenar desde JSON</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Rellenar desde JSON</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <p className="text-sm text-muted-foreground">
+                  Pega el contenido de un archivo JSON para pre-rellenar el formulario. La estructura del JSON debe coincidir con los nombres (`name`) de los campos definidos en el schema de la plantilla.
+                </p>
+                <Textarea
+                  placeholder='{ "campo1": "valor1", "campo2": 123 }'
+                  value={jsonData}
+                  onChange={(e) => setJsonData(e.target.value)}
+                  className="min-h-[200px] max-h-[200px] font-mono"
+                />
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary">
+                    Cancelar
+                  </Button>
+                </DialogClose>
+                <Button type="button" onClick={handleLoadJson}>Cargar Datos</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <FormRenderer schema={template.schema} initialData={currentFormData || {}} onSubmit={handleFormSubmit} />
@@ -387,43 +387,43 @@ export default function TemplatePage({ params }: TemplatePageProps) {
   }
 
   return (
-      <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-6">
-            <div>
-              <p className="text-muted-foreground mt-1">
-                {template ? template.description : 'Cargando descripción...'}
-              </p>
-            </div>
-            <Button onClick={() => setView(view === 'list' ? 'form' : 'list')}>
-                {view === 'list' ? 'Crear Nuevo Documento' : 'Volver a la Lista'}
-            </Button>
+    <div className="container mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <p className="text-muted-foreground mt-1">
+            {template ? template.description : 'Cargando descripción...'}
+          </p>
         </div>
+        <Button onClick={() => setView(view === 'list' ? 'form' : 'list')}>
+          {view === 'list' ? 'Crear Nuevo Documento' : 'Volver a la Lista'}
+        </Button>
+      </div>
 
-        {view === 'list' ? (
-            <div>
-                <h2 className="text-xl font-semibold mb-4">Documentos Creados</h2>
-                {renderDocumentList()}
-            </div>
-       ) : (
-           renderFormView()
-       )}
+      {view === 'list' ? (
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Documentos Creados</h2>
+          {renderDocumentList()}
+        </div>
+      ) : (
+        renderFormView()
+      )}
 
-       {docToDelete && (
-           <Dialog open={!!docToDelete} onOpenChange={() => setDocToDelete(null)}>
-               <DialogContent>
-                   <DialogHeader>
-                       <DialogTitle>Confirmar Borrado</DialogTitle>
-                       <DialogDescription>
-                           ¿Estás seguro de que quieres borrar el documento <strong>{docToDelete.name}</strong>? Esta acción no se puede deshacer.
-                       </DialogDescription>
-                   </DialogHeader>
-                   <DialogFooter>
-                       <Button variant="secondary" onClick={() => setDocToDelete(null)}>Cancelar</Button>
-                       <Button variant="destructive" onClick={() => handleDelete(docToDelete)}>Borrar</Button>
-                   </DialogFooter>
-               </DialogContent>
-           </Dialog>
-       )}
-   </div>
- );
+      {docToDelete && (
+        <Dialog open={!!docToDelete} onOpenChange={() => setDocToDelete(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar Borrado</DialogTitle>
+              <DialogDescription>
+                ¿Estás seguro de que quieres borrar el documento <strong>{docToDelete.name}</strong>? Esta acción no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="secondary" onClick={() => setDocToDelete(null)}>Cancelar</Button>
+              <Button variant="destructive" onClick={() => handleDelete(docToDelete)}>Borrar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
 }

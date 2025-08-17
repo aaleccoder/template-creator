@@ -1,0 +1,207 @@
+{
+  "title": "Generador de Documentos Oficiales",
+  "description": "Rellena los siguientes campos para crear una factura, presupuesto o albarán profesional. Los cálculos de totales e impuestos se realizarán automáticamente en el documento final (PDF A4).",
+  "fields": [
+    {
+      "name": "document_type",
+      "label": "Tipo de Documento",
+      "type": "select",
+      "required": true,
+      "options": [
+        {
+          "value": "factura",
+          "label": "Factura"
+        },
+        {
+          "value": "presupuesto",
+          "label": "Presupuesto"
+        },
+        {
+          "value": "factura_proforma",
+          "label": "Factura Proforma"
+        },
+        {
+          "value": "albaran",
+          "label": "Albarán"
+        }
+      ]
+    },
+    {
+      "name": "document_id",
+      "label": "Número de Documento",
+      "type": "text",
+      "required": true,
+      "placeholder": "Ej: F-2024-001"
+    },
+    {
+      "name": "issue_date",
+      "label": "Fecha de Emisión",
+      "type": "date",
+      "required": true
+    },
+    {
+      "name": "due_date",
+      "label": "Fecha de Vencimiento",
+      "type": "date",
+      "required": false
+    },
+    {
+      "name": "company_logo",
+      "label": "Logotipo de la Empresa",
+      "type": "image",
+      "required": false,
+      "maxSizeMB": 2,
+      "acceptMime": "image/png, image/jpeg"
+    },
+    {
+      "name": "company_info",
+      "label": "Datos del Emisor (Tu Empresa)",
+      "type": "text",
+      "required": true,
+      "placeholder": "Nombre Fiscal de la Empresa S.L."
+    },
+    {
+      "name": "company_nif",
+      "label": "NIF/CIF del Emisor",
+      "type": "text",
+      "required": true,
+      "pattern": "^[A-Za-z]?[0-9]{8}[A-Za-z]$",
+      "placeholder": "B12345678"
+    },
+    {
+      "name": "company_address",
+      "label": "Dirección Fiscal del Emisor",
+      "type": "textarea",
+      "required": true,
+      "placeholder": "Calle de la Empresa, 123\n28080 Madrid\nEspaña"
+    },
+    {
+      "name": "client_info",
+      "label": "Datos del Cliente",
+      "type": "text",
+      "required": true,
+      "placeholder": "Nombre Fiscal del Cliente S.A."
+    },
+    {
+      "name": "client_nif",
+      "label": "NIF/CIF del Cliente",
+      "type": "text",
+      "required": true,
+      "pattern": "^[A-Za-z]?[0-9]{8}[A-Za-z]$",
+      "placeholder": "A87654321"
+    },
+    {
+      "name": "client_address",
+      "label": "Dirección Fiscal del Cliente",
+      "type": "textarea",
+      "required": true,
+      "placeholder": "Avenida del Cliente, 456\n08080 Barcelona\nEspaña"
+    },
+    {
+      "name": "line_items",
+      "label": "Conceptos",
+      "type": "array",
+      "required": true,
+      "minItems": 1,
+      "itemFields": [
+        {
+          "name": "description",
+          "label": "Descripción del Concepto",
+          "type": "text",
+          "required": true,
+          "placeholder": "Ej: Desarrollo de módulo de software"
+        },
+        {
+          "name": "quantity",
+          "label": "Cantidad",
+          "type": "number",
+          "required": true,
+          "min": 0,
+          "placeholder": "1"
+        },
+        {
+          "name": "unit_price",
+          "label": "Precio Unitario (€)",
+          "type": "number",
+          "required": true,
+          "min": 0,
+          "step": 0.01,
+          "placeholder": "1500.00"
+        }
+      ]
+    },
+    {
+      "name": "vat_percentage",
+      "label": "Porcentaje de IVA (%)",
+      "type": "select",
+      "required": true,
+      "options": [
+        {
+          "value": "21",
+          "label": "General (21%)"
+        },
+        {
+          "value": "10",
+          "label": "Reducido (10%)"
+        },
+        {
+          "value": "4",
+          "label": "Superreducido (4%)"
+        },
+        {
+          "value": "0",
+          "label": "Exento (0%)"
+        }
+      ]
+    },
+    {
+      "name": "irpf_percentage",
+      "label": "Porcentaje de Retención IRPF (%)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 100,
+      "placeholder": "15"
+    },
+    {
+      "name": "payment_method",
+      "label": "Método de Pago",
+      "type": "select",
+      "required": true,
+      "placeholder": "Seleccione un método de pago",
+      "options": [
+        {
+          "value": "transferencia",
+          "label": "Transferencia Bancaria"
+        },
+        {
+          "value": "tarjeta",
+          "label": "Tarjeta de Crédito/Débito"
+        },
+        {
+          "value": "paypal",
+          "label": "PayPal"
+        },
+        {
+          "value": "domiciliacion",
+          "label": "Domiciliación Bancaria"
+        }
+      ]
+    },
+    {
+      "name": "notes",
+      "label": "Notas Adicionales",
+      "type": "textarea",
+      "required": false,
+      "maxLength": 1000,
+      "placeholder": "Información sobre el IBAN para transferencias, agradecimientos, o cualquier otra nota relevante."
+    },
+    {
+      "name": "legal_terms",
+      "label": "Términos Legales",
+      "type": "textarea",
+      "required": false,
+      "placeholder": "Añada aquí el texto legal requerido, como la política de protección de datos (RGPD) o las condiciones del servicio."
+    }
+  ]
+}

@@ -15,11 +15,22 @@ export async function generatePdfFromHtml(html: string): Promise<Uint8Array> {
     const form = new (globalThis as any).FormData();
     const blob = new (globalThis as any).Blob([html], { type: 'text/html' });
     form.append('files', blob, 'index.html');
-    form.append('printBackground', 'true'); // equivalente a Puppeteer printBackground
+    form.append('printBackground', 'true');
+    form.append('preferCSSPageSize', 'true'); // Le indica a Gotenberg que use el tamaño de página del CSS (@page)
+
+    const username = process.env.GOTENBERG_API_BASIC_AUTH_USERNAME;
+    const password = process.env.GOTENBERG_API_BASIC_AUTH_PASSWORD;
+
+    const headers: HeadersInit = {};
+    if (username && password) {
+      const credentials = btoa(`${username}:${password}`);
+      headers['Authorization'] = `Basic ${credentials}`;
+    }
 
     const res = await fetch(`${base}/forms/chromium/convert/html`, {
       method: 'POST',
       body: form as any,
+      headers,
     });
 
     if (!res.ok) {

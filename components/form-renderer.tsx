@@ -96,26 +96,6 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
         }
     }, [stringifiedSchema]);
 
-    useEffect(() => {
-        const parsedInitialData = JSON.parse(stringifiedInitialData);
-    
-        const initialFormState: { [key: string]: any } = {};
-        const initialErrors: Record<string, string | null> = {};
-        normalizedFields.forEach((field: FormField) => {
-            if (parsedInitialData && parsedInitialData[field.name] !== undefined) {
-                initialFormState[field.name] = parsedInitialData[field.name];
-            } else if (field.type === 'array') {
-                initialFormState[field.name] = field.itemFields ? [] : {};
-            } else {
-                initialFormState[field.name] = '';
-            }
-            initialErrors[field.name] = null;
-        });
-        setFormData(initialFormState);
-        setErrors(initialErrors);
-    }, [stringifiedInitialData, normalizedFields]);
-
-    // Helpers
     const isEmpty = (v: any) => v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
 
     const validateField = useCallback((field: FormField, value: any): string | null => {
@@ -188,6 +168,27 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
 
         return null;
     }, []);
+
+    useEffect(() => {
+        const parsedInitialData = JSON.parse(stringifiedInitialData);
+        const initialFormState: { [key: string]: any } = {};
+        const newErrors: Record<string, string | null> = {};
+
+        normalizedFields.forEach((field: FormField) => {
+            const value = parsedInitialData?.[field.name];
+            if (value !== undefined) {
+                initialFormState[field.name] = value;
+            } else if (field.type === 'array') {
+                initialFormState[field.name] = field.itemFields ? [] : {};
+            } else {
+                initialFormState[field.name] = '';
+            }
+            newErrors[field.name] = validateField(field, initialFormState[field.name]);
+        });
+
+        setFormData(initialFormState);
+        setErrors(newErrors);
+    }, [stringifiedInitialData, normalizedFields, validateField]);
     
     const handleInputChange = useCallback((key: string, value: any) => {
         // Find field by key for coercion and validation
@@ -285,19 +286,71 @@ export default function FormRenderer({ schema, onSubmit, initialData = {}, submi
                                 onClick={() => removeArrayItem(key, index)}
                                 className="absolute top-2 right-2"
                             > X </Button>
-                            {field.itemFields?.map(subField => (
-                                <div key={subField.name} className="grid w-full items-center gap-1.5">
-                                    <Label htmlFor={`${key}-${index}-${subField.name}`}>{subField.label}</Label>
-                                    <Input
-                                        type={subField.type || 'text'}
-                                        id={`${key}-${index}-${subField.name}`}
-                                        value={item[subField.name] || ''}
-                                        onChange={e => handleArrayChange(key, index, subField.name, e.target.value)}
-                                        placeholder={subField.placeholder}
-                                        required={subField.required}
-                                    />
-                                </div>
-                            ))}
+                            {field.itemFields?.map(subField => {
+                                const subFieldKey = `${key}-${index}-${subField.name}`;
+                                const subFieldValue = item[subField.name] || '';
+
+                                const derivedInputType =
+                                    subField.format === 'email' ? 'email' :
+                                    subField.type === 'number' ? 'number' :
+                                    subField.type || 'text';
+
+                                return (
+                                    <div key={subField.name} className="grid w-full items-center gap-1.5">
+                                        {subField.type !== 'image' && (
+                                            <Label htmlFor={subFieldKey}>{subField.label}</Label>
+                                        )}
+                                        {
+                                            subField.type === 'textarea' ? (
+                                                <Textarea
+                                                    id={subFieldKey}
+                                                    value={subFieldValue}
+                                                    onChange={(e) => handleArrayChange(key, index, subField.name, e.target.value)}
+                                                    placeholder={subField.placeholder}
+                                                    required={subField.required}
+                                                />
+                                            ) : subField.type === 'image' ? (
+                                                <ImageUploader
+                                                    label={subField.label}
+                                                    initialUrl={subFieldValue}
+                                                    onUploadComplete={(url) => handleArrayChange(key, index, subField.name, url)}
+                                                    acceptMime={subField.acceptMime || 'image/*'}
+                                                    maxSizeMB={subField.maxSizeMB || 5}
+                                                />
+                                            ) : subField.type === 'select' ? (
+                                                <>
+                                                    <Select onValueChange={(value: string) => handleArrayChange(key, index, subField.name, value)} value={subFieldValue}>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder={subField.placeholder || 'Seleccione una opción'} />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {subField.options?.map(option => (
+                                                                <SelectItem key={option.value} value={option.value}>
+                                                                    {option.label}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </>
+                                            ) : (
+                                                <Input
+                                                    type={derivedInputType}
+                                                    id={subFieldKey}
+                                                    value={subFieldValue}
+                                                    onChange={e => handleArrayChange(key, index, subField.name, e.target.value)}
+                                                    placeholder={subField.placeholder}
+                                                    required={subField.required}
+                                                    min={subField.type === 'number' && subField.min !== undefined ? subField.min : undefined}
+                                                    max={subField.type === 'number' && subField.max !== undefined ? subField.max : undefined}
+                                                    step={subField.type === 'number' && subField.step !== undefined ? subField.step : (subField.integer ? 1 : undefined)}
+                                                    pattern={subField.pattern}
+                                                    inputMode={subField.type === 'number' ? 'decimal' : undefined}
+                                                />
+                                            )
+                                        }
+                                    </div>
+                                );
+                            })}
                         </div>
                     ))}
                     <Button type="button" variant="outline" onClick={() => addArrayItem(key)}>

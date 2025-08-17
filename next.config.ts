@@ -1,20 +1,11 @@
 import type { NextConfig } from "next";
 
-const pocketbase_url = process.env.POCKETBASE_URL || 'http://localhost:8090';
 
-console.log(pocketbase_url);
 
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: pocketbase_url,
-        pathname: '/api/files/**',
-      }
-    ]
+    remotePatterns: [new URL("https://back-pdf.srv812681.hstgr.cloud/**")]
   }
-};
-
+}
 export default nextConfig;
