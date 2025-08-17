@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Handlebars from 'handlebars';
+import Handlebars from 'handlebars/dist/handlebars.js';
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,11 +9,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Template HTML or data is missing.' }, { status: 400 });
     }
 
-    Handlebars.registerHelper('json', function(context) {
+    Handlebars.registerHelper('json', function(context: any) {
         return JSON.stringify(context);
     });
 
-    Handlebars.registerHelper('formatCurrency', function (value, options) {
+    Handlebars.registerHelper('formatCurrency', function (value: any, options: any) {
       if (typeof value !== 'number') {
         return value;
       }
@@ -26,18 +26,18 @@ export async function POST(req: NextRequest) {
       }).format(value);
     });
 
-    Handlebars.registerHelper('calculate_subtotal', function (items) {
+    Handlebars.registerHelper('calculate_subtotal', function (items: any) {
       if (!Array.isArray(items)) {
         return 0;
       }
-      return items.reduce((total, item) => {
+      return items.reduce((total: any, item: any) => {
         const price = Number(item.unit_price || 0);
         const quantity = Number(item.quantity || 1);
         return total + (price * quantity);
       }, 0);
     });
 
-    Handlebars.registerHelper('calculate_tax', function (base_amount, percentage) {
+    Handlebars.registerHelper('calculate_tax', function (base_amount: any, percentage: any) {
       const amount = Number(base_amount);
       const percent = Number(percentage);
       if (isNaN(amount) || isNaN(percent)) {
@@ -46,12 +46,12 @@ export async function POST(req: NextRequest) {
       return (amount * percent) / 100;
     });
 
-    Handlebars.registerHelper('calculate_grand_total', function (items, vat_percentage, irpf_percentage) {
+    Handlebars.registerHelper('calculate_grand_total', function (items: any, vat_percentage: any, irpf_percentage: any) {
       if (!Array.isArray(items)) {
         return 0;
       }
 
-      const subtotal = items.reduce((total, item) => {
+      const subtotal = items.reduce((total: any, item: any) => {
         const price = Number(item.unit_price || 0);
         const quantity = Number(item.quantity || 1);
         return total + (price * quantity);
@@ -67,19 +67,19 @@ export async function POST(req: NextRequest) {
     });
 
     // Math Helpers
-    Handlebars.registerHelper('add', function (a, b) {
+    Handlebars.registerHelper('add', function (a: any, b: any) {
       return Number(a) + Number(b);
     });
 
-    Handlebars.registerHelper('subtract', function (a, b) {
+    Handlebars.registerHelper('subtract', function (a: any, b: any) {
       return Number(a) - Number(b);
     });
 
-    Handlebars.registerHelper('multiply', function (a, b) {
+    Handlebars.registerHelper('multiply', function (a: any, b: any) {
       return Number(a) * Number(b);
     });
 
-    Handlebars.registerHelper('divide', function (a, b) {
+    Handlebars.registerHelper('divide', function (a: any, b: any) {
       if (Number(b) === 0) {
         return 'Cannot divide by zero';
       }
@@ -87,40 +87,40 @@ export async function POST(req: NextRequest) {
     });
 
     // Comparison Helpers
-    Handlebars.registerHelper('eq', function (a, b) {
+    Handlebars.registerHelper('eq', function (a: any, b: any) {
       return a === b;
     });
 
-    Handlebars.registerHelper('neq', function (a, b) {
+    Handlebars.registerHelper('neq', function (a: any, b: any) {
       return a !== b;
     });
 
-    Handlebars.registerHelper('lt', function (a, b) {
+    Handlebars.registerHelper('lt', function (a: any, b: any) {
       return a < b;
     });
 
-    Handlebars.registerHelper('gt', function (a, b) {
+    Handlebars.registerHelper('gt', function (a: any, b: any) {
       return a > b;
     });
 
-    Handlebars.registerHelper('lte', function (a, b) {
+    Handlebars.registerHelper('lte', function (a: any, b: any) {
       return a <= b;
     });
 
-    Handlebars.registerHelper('gte', function (a, b) {
+    Handlebars.registerHelper('gte', function (a: any, b: any) {
       return a >= b;
     });
 
     // Logical Helpers
-    Handlebars.registerHelper('and', function () {
-      return Array.prototype.slice.call(arguments, 0, -1).every(Boolean);
+    Handlebars.registerHelper('and', function (...args: any[]) {
+      return args.slice(0, -1).every(Boolean);
     });
 
-    Handlebars.registerHelper('or', function () {
-      return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
+    Handlebars.registerHelper('or', function (...args: any[]) {
+      return args.slice(0, -1).some(Boolean);
     });
 
-    Handlebars.registerHelper('not', function (a) {
+    Handlebars.registerHelper('not', function (a: any) {
         return !a;
     });
 
