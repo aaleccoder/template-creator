@@ -129,7 +129,7 @@ export function registerHandlebarsHelpers(customHelpers: CustomHelper[] = []) {
      */
     Handlebars.registerHelper(
       "calculate_grand_total",
-      function (items, vatPercentage, irpfPercentage) {
+      function (this: any, items: any[], vatPercentage: number, irpfPercentage: number) {
         // Reutilizar la lógica de los otros helpers para consistencia
         const subtotal = Handlebars.helpers.calculate_subtotal.call(this, items);
         const vatAmount = Handlebars.helpers.calculate_tax.call(
