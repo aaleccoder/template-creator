@@ -6,7 +6,6 @@ import FormRenderer from "@/components/form-renderer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Handlebars from "handlebars/dist/handlebars.js";
 import {
   Dialog,
   DialogContent,
