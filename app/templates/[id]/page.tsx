@@ -267,7 +267,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                         setIsPreviewModalOpen(true);
                       }}
                       title="Vista Previa"
-                      className="cursor-pointer"
+                      className="cursor-pointer hidden md:inline-flex"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -347,7 +347,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
             </div>
           </div>
           <div
-            className="border rounded-lg p-4 bg-white text-black"
+            className="border rounded-lg p-4 bg-white text-black hiddden md:block"
             dangerouslySetInnerHTML={{ __html: previewHtml }}
           />
         </div>
@@ -449,12 +449,12 @@ export default function TemplatePage({ params }: TemplatePageProps) {
       <Dialog open={isPreviewModalOpen} onOpenChange={setIsPreviewModalOpen}>
         <DialogContent className="sm:max-w-[800px] h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Vista Previa del Documento</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="hidden md:block">Vista Previa del Documento</DialogTitle>
+            <DialogDescription className="hidden md:block">
               Aquí puedes ver la vista previa del documento generado para esta plantilla.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex-grow overflow-auto border rounded-lg p-4 bg-white text-black">
+          <div className="flex-grow overflow-auto border rounded-lg p-4 bg-white text-black hidden md:block">
             {previewDocumentHtml ? (
               <div dangerouslySetInnerHTML={{ __html: previewDocumentHtml }} />
             ) : (

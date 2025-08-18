@@ -18,22 +18,20 @@ export default function AuthPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [networkError, setNetworkError] = useState(false)
   const router = useRouter()
 
   const isEmailValid = useMemo(() => {
-    if (email.length === 0) return true // Don't show error on empty input
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     return emailRegex.test(email)
   }, [email])
 
   const handleLogin = async () => {
     setError(null)
-    if (!isEmailValid) {
-      setError("Por favor, ingrese un correo electrónico válido.")
-      return
-    }
-    if (!email || !password) {
-      setError("Por favor, ingrese su correo y contraseña.")
+    setNetworkError(false)
+
+    if (!isEmailValid || !password) {
+      setError("Por favor, complete todos los campos correctamente.")
       return
     }
 
@@ -48,7 +46,8 @@ export default function AuthPage() {
         router.push("/dashboard")
       } else {
         if (response.status >= 500) {
-          setError("Ocurrió un error en el servidor. Inténtelo más tarde.")
+          setError("Ocurrió un error en el servidor.")
+          setNetworkError(true)
         } else {
           setError("El correo electrónico o la contraseña son incorrectos.")
         }
@@ -56,10 +55,11 @@ export default function AuthPage() {
     } catch (error) {
       console.error("Login error:", error)
       setError("No se pudo conectar con el servidor. Revise su conexión.")
+      setNetworkError(true)
     }
   }
 
-  const isButtonDisabled = !email || !password || !isEmailValid
+  const isButtonDisabled = !isEmailValid || !password || networkError
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
@@ -79,9 +79,9 @@ export default function AuthPage() {
               placeholder="tu@email.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className={!isEmailValid && email.length > 0 ? "border-red-500" : ""}
+              className={email.length > 0 && !isEmailValid ? "border-red-500" : ""}
             />
-            {!isEmailValid && email.length > 0 && (
+            {email.length > 0 && !isEmailValid && (
               <p className="text-sm text-red-500">
                 Por favor, ingrese un correo válido.
               </p>
@@ -97,6 +97,17 @@ export default function AuthPage() {
             />
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
+          {networkError && (
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => window.location.reload()}
+              >
+                Recargar la página
+              </Button>
+            </div>
+          )}
         </CardContent>
         <CardFooter>
           <Button

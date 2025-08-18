@@ -53,8 +53,8 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
 
   const handleLoadJson = () => {
     if (!jsonData) {
-        alert("El JSON no puede estar vacío.");
-        return;
+      alert("El JSON no puede estar vacío.");
+      return;
     }
     try {
       const parsedData = JSON.parse(jsonData);
@@ -129,18 +129,18 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
     return (
       <div className="mt-6">
         <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Vista Previa del Documento</h2>
-            <div className="flex gap-2">
-                <Button variant="secondary" onClick={() => setPreviewHtml(null)} disabled={isSaving}>
-                    Volver al Formulario
-                </Button>
-                <Button onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? 'Guardando...' : 'Guardar Cambios'}
-                </Button>
-            </div>
+          <h2 className="text-xl font-semibold">Vista Previa del Documento</h2>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setPreviewHtml(null)} disabled={isSaving}>
+              Volver al Formulario
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+            </Button>
+          </div>
         </div>
         <div
-          className="border rounded-lg p-4 bg-white text-black"
+          className="border rounded-lg p-4 bg-white text-black w-[100vh] h-50% overflow-x-auto"
           dangerouslySetInnerHTML={{ __html: previewHtml }}
         />
       </div>
@@ -149,53 +149,53 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
 
   return (
     <div className="mt-8 max-w-2xl mx-auto">
-        <div className="space-y-2 mb-4">
-            <Label htmlFor="docName">Nombre del Documento</Label>
-            <Input 
-                id="docName"
-                value={documentName}
-                onChange={(e) => setDocumentName(e.target.value)}
-            />
-        </div>
-
-        <div className="mb-8">
-            <Dialog open={isJsonModalOpen} onOpenChange={setIsJsonModalOpen}>
-                <DialogTrigger asChild>
-                    <Button variant="outline">Rellenar desde JSON</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[600px]">
-                    <DialogHeader>
-                        <DialogTitle>Rellenar desde JSON</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <p className="text-sm text-muted-foreground">
-                            Pega el contenido de un archivo JSON para pre-rellenar el formulario. La estructura del JSON debe coincidir con los nombres (`name`) de los campos definidos en el schema de la plantilla.
-                        </p>
-                        <Textarea
-                            placeholder='{ "campo1": "valor1", "campo2": 123 }'
-                            value={jsonData}
-                            onChange={(e) => setJsonData(e.target.value)}
-                            className="min-h-[200px] font-mono"
-                        />
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button type="button" variant="secondary">
-                                Cancelar
-                            </Button>
-                        </DialogClose>
-                        <Button type="button" onClick={handleLoadJson}>Cargar Datos</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
-
-        <FormRenderer 
-            schema={initialTemplate.schema}
-            initialData={currentFormData}
-            onSubmit={handleFormSubmit}
-            submitButtonText="Actualizar Vista Previa"
+      <div className="space-y-2 mb-4">
+        <Label htmlFor="docName">Nombre del Documento</Label>
+        <Input
+          id="docName"
+          value={documentName}
+          onChange={(e) => setDocumentName(e.target.value)}
         />
+      </div>
+
+      <div className="mb-8">
+        <Dialog open={isJsonModalOpen} onOpenChange={setIsJsonModalOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline">Rellenar desde JSON</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Rellenar desde JSON</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <p className="text-sm text-muted-foreground">
+                Pega el contenido de un archivo JSON para pre-rellenar el formulario. La estructura del JSON debe coincidir con los nombres (`name`) de los campos definidos en el schema de la plantilla.
+              </p>
+              <Textarea
+                placeholder='{ "campo1": "valor1", "campo2": 123 }'
+                value={jsonData}
+                onChange={(e) => setJsonData(e.target.value)}
+                className="min-h-[200px] font-mono"
+              />
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Cancelar
+                </Button>
+              </DialogClose>
+              <Button type="button" onClick={handleLoadJson}>Cargar Datos</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <FormRenderer
+        schema={initialTemplate.schema}
+        initialData={currentFormData}
+        onSubmit={handleFormSubmit}
+        submitButtonText="Actualizar Vista Previa"
+      />
     </div>
   );
 }
