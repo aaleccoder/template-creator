@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Handlebars from 'handlebars';
+import Handlebars from 'handlebars/dist/cjs/handlebars';
 import { registerHandlebarsHelpers } from '@/lib/handlebars-helpers';
 
 export async function POST(req: NextRequest) {

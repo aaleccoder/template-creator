@@ -12,6 +12,7 @@ interface TemplateData {
   schema: any;
   html: string;
   css: string;
+  helpers: any;
 }
 
 interface DocumentData {
