@@ -14,9 +14,11 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       return NextResponse.json({ message: 'No autorizado.' }, { status: 401 });
     }
 
-    const record = await pb.collection('generated_documents').getOne(id);
+    const record = await pb.collection('generated_documents').getOne(id, {
+      expand: 'template',
+    });
 
-    if (record.owner !== pb.authStore.model?.id) {
+    if (record.owner !== pb.authStore.record?.id) {
       return NextResponse.json({ message: 'Acceso prohibido.' }, { status: 403 });
     }
 

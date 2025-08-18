@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
+
 // Tipos de datos que este componente espera recibir
 interface TemplateData {
   id: string;
@@ -26,6 +27,7 @@ interface TemplateData {
   schema: any;
   html: string;
   css: string;
+  helpers: any; // Add helpers property
 }
 
 interface DocumentData {
@@ -64,18 +66,30 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
     }
   };
 
-  const handleFormSubmit = (formData: { [key: string]: any }) => {
+  const handleFormSubmit = async (formData: { [key: string]: any }) => {
     setCurrentFormData(formData);
+    try {
+      const response = await fetch('/api/templates/compile-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          html: initialTemplate.html,
+          css: initialTemplate.css,
+          data: formData,
+          helpers: initialTemplate.helpers,
+        }),
+      });
 
-    // Compilar la plantilla con Handlebars para soportar {{#if}} y {{#each}}
-    const compile = Handlebars.compile(initialTemplate.html);
-    const processedHtml = compile(formData);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al generar la vista previa.');
+      }
 
-    const finalHtml = `
-      <style>${initialTemplate.css}</style>
-      ${processedHtml}
-    `;
-    setPreviewHtml(finalHtml);
+      const { previewHtml } = await response.json();
+      setPreviewHtml(previewHtml);
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    }
   };
 
   const handleSave = async () => {
@@ -101,7 +115,7 @@ export default function DocumentEditor({ initialDocument, initialTemplate }: Doc
         const errorData = await response.json();
         throw new Error(errorData.message || 'Error al actualizar el documento.');
       }
-      alert('Documento actualizado con éxito!');
+      toast.success('Documento actualizado con éxito!');
       router.push(`/templates/${initialDocument.template}`); // Volver al hub de la plantilla
       router.refresh(); // Refrescar los datos en la página anterior
     } catch (err: any) {

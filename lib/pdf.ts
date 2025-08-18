@@ -1,12 +1,12 @@
 export async function generatePdfFromHtml(html: string): Promise<Uint8Array> {
   const gotenbergUrl =
-    (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_GOTENBERG_URL) ||
+    (typeof process !== 'undefined' && process.env.GOTENBERG_ENDPOINT) ||
     (typeof process !== 'undefined' && process.env.GOTENBERG_URL) ||
     '';
 
   if (!gotenbergUrl) {
     throw new Error(
-      'La URL de Gotenberg no está configurada en las variables de entorno (GOTENBERG_URL o NEXT_PUBLIC_GOTENBERG_URL).',
+      'La URL de Gotenberg no está configurada en las variables de entorno (GOTENBERG_URL o GOTENBERG_ENDPOINT).',
     );
   }
 

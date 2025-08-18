@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
     const records = await pb.collection('documents').getFullList({
       sort: '-created',
       expand: 'file',
-      filter: `file.owner = "${currentUser?.id}"`,
     });
 
     const result = records.map((doc: any) => {
@@ -25,7 +24,7 @@ export async function GET(request: NextRequest) {
         id: doc.id,
         title: doc.title,
         description: doc.description,
-        file: doc.file, 
+        file: doc.file,
         created: doc.created,
         updated: doc.updated,
         pdfUrl,
@@ -35,6 +34,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result, { status: 200 });
   } catch (error: any) {
     console.error('Error listando documentos:', error);
+    if (error.response) {
+      console.error('PocketBase error response:', error.response);
+    }
+    if (error.cause) {
+      console.error('Error cause:', error.cause);
+    }
     return NextResponse.json(
       { message: 'Ocurrió un error al obtener los documentos.', error: error?.message },
       { status: 500 }

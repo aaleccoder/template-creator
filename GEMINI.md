@@ -67,8 +67,8 @@ There are no testing frameworks configured in `package.json`.
 
 The application uses environment variables to configure the PocketBase and Gotenberg URLs. These are hardcoded in the respective library files (`lib/pocketbase.ts` and `lib/pdf.ts`) and should be refactored to use a `.env` file.
 
-*   `NEXT_PUBLIC_POCKETBASE_URL`: The URL of the PocketBase instance.
-*   `NEXT_PUBLIC_GOTENBERG_URL`: The URL of the Gotenberg instance.
+*   `POCKETBASE_URL`: The URL of the PocketBase instance.
+*   `GOTENBERG_ENDPOINT`: The URL of the Gotenberg instance.
 
 ## PocketBase Setup
 

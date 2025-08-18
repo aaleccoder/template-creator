@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pb from '@/lib/pocketbase';
 
-const GOTENBERG_ENDPOINT = process.env.NEXT_PUBLIC_GOTENBERG_ENDPOINT;
+const GOTENBERG_ENDPOINT = process.env.GOTENBERG_ENDPOINT;
 
 if (!GOTENBERG_ENDPOINT) {
-  console.error('NEXT_PUBLIC_GOTENBERG_ENDPOINT environment variable is not set.');
+  console.error('GOTENBERG_ENDPOINT environment variable is not set.');
 }
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {

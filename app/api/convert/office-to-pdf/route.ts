@@ -2,13 +2,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pb from '@/lib/pocketbase';
 
-const GOTENBERG_ENDPOINT = process.env.NEXT_PUBLIC_GOTENBERG_ENDPOINT;
+const GOTENBERG_ENDPOINT = process.env.GOTENBERG_ENDPOINT;
 
 const GOTENBERG_HTTP_USERNAME = process.env.GOTENBERG_API_BASIC_AUTH_USERNAME;
 const GOTENBERG_HTTP_PASSWORD = process.env.GOTENBERG_API_BASIC_AUTH_PASSWORD;
 
 if (!GOTENBERG_ENDPOINT) {
-  console.error('NEXT_PUBLIC_GOTENBERG_ENDPOINT environment variable is not set.');
+  console.error('GOTENBERG_ENDPOINT environment variable is not set.');
 }
 
 export async function POST(request: NextRequest) {
@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
   const currentUser = pb.authStore.record;
   console.log(`User authenticated: ${currentUser?.id}`);
 
+  let assetRecordId: string | null = null;
   try {
     console.log('Processing form data...');
     const formData = await request.formData();
@@ -84,12 +85,14 @@ export async function POST(request: NextRequest) {
     pbFormData.append('mime', 'application/pdf');
 
     const assetRecord = await pb.collection('assets').create(pbFormData);
+    assetRecordId = assetRecord.id;
     console.log(`Asset created in PocketBase with ID: ${assetRecord.id}`);
 
     const documentRecord = await pb.collection('documents').create({
       title,
       description,
       file: assetRecord.id,
+      owner: currentUser?.id,
     });
     console.log(`Document created in PocketBase with ID: ${documentRecord.id}`);
 
@@ -111,6 +114,19 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Error during office file conversion:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error.' }, { status: 500 });
+
+    // More detailed logging
+    if (error.response) {
+      console.error('PocketBase response:', JSON.stringify(error.response, null, 2));
+    }
+    if (error.cause) {
+      console.error('Error cause:', error.cause);
+    }
+
+    if (assetRecordId) {
+        console.log(`Rolling back asset creation: ${assetRecordId}`);
+        await pb.collection('assets').delete(assetRecordId);
+    }
+    return NextResponse.json({ error: 'Error al procesar el archivo. No se ha guardado el documento.', details: error.message }, { status: 500 });
   }
 }

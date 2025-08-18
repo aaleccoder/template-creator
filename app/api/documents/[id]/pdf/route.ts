@@ -6,27 +6,30 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   const { id: documentId } = await context.params;
 
   try {
-    pb.authStore.loadFromCookie(request.headers.get('cookie') || '');
-    if (!pb.authStore.isValid) {
-      return NextResponse.json({ message: 'No autorizado.' }, { status: 401 });
-    }
-
-    const currentUser = pb.authStore.record;
-    if (!currentUser) {
-      return NextResponse.json({ message: 'Usuario no encontrado.' }, { status: 401 });
-    }
-
+    // First, check if a PDF already exists and is public.
     let existingAsset;
     try {
-      const filter = `document = "${documentId}" && owner = "${currentUser.id}" && usage = "generated_pdf"`;
+      const filter = `document = "${documentId}" && (usage = "generated_pdf" || usage = "converted_office_pdf")`;
       existingAsset = await pb.collection('assets').getFirstListItem(filter, { sort: '-created' });
     } catch (error: any) {
-      if (error.status !== 404) throw error;
+      if (error.status !== 404) throw error; // Ignore 404 "Not Found" errors
     }
 
     if (existingAsset) {
       const fileUrl = pb.files.getURL(existingAsset, existingAsset.file);
       return NextResponse.redirect(fileUrl.toString());
+    }
+
+    // If no PDF exists, then we must generate one.
+    // This part requires authentication.
+    pb.authStore.loadFromCookie(request.headers.get('cookie') || '');
+    if (!pb.authStore.isValid) {
+      return NextResponse.json({ message: 'No autorizado para generar un nuevo PDF.' }, { status: 401 });
+    }
+
+    const currentUser = pb.authStore.record;
+    if (!currentUser) {
+      return NextResponse.json({ message: 'Usuario no encontrado.' }, { status: 401 });
     }
 
     const document = await pb.collection('generated_documents').getOne(documentId);

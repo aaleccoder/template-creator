@@ -1,6 +1,5 @@
 "use client"
 import DocumentEditor from "@/components/document-editor";
-import pb from "@/lib/pocketbase";
 import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
@@ -43,10 +42,16 @@ export default function EditDocumentPage() {
 
   useEffect(() => {
     const fetchDocument = async () => {
+      setLoading(true);
       try {
-        const doc = await pb.collection('generated_documents').getOne<DocumentData>(documentId, {
-          expand: 'template'
-        });
+        const response = await fetch(`/api/documents/${documentId}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("API Error:", errorData.message);
+          throw new Error(errorData.message || 'Failed to fetch document');
+        }
+        const doc = await response.json();
+
         if (!doc.expand?.template) {
           throw new Error("No se pudo encontrar la plantilla asociada a este documento.");
         }
@@ -54,10 +59,12 @@ export default function EditDocumentPage() {
         setTemplate(doc.expand.template);
       } catch (error) {
         console.error("Failed to fetch document:", error);
+        // Optionally, set an error state here to show in the UI
       } finally {
         setLoading(false);
       }
     };
+
     if (documentId) {
       fetchDocument();
     }

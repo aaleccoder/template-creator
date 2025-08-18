@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Clipboard, FilePenLine, Trash2 } from 'lucide-react';
+import { Clipboard, FilePenLine, Trash2, Eye } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from 'sonner';
 
@@ -29,6 +29,8 @@ interface TemplateData {
   schema: any;
   html: string;
   css: string;
+  helpers: any;
+  preview?: string; // Add preview field
 }
 
 interface GeneratedDocument {
@@ -56,6 +58,8 @@ export default function TemplatePage({ params }: TemplatePageProps) {
   const [docToDelete, setDocToDelete] = useState<GeneratedDocument | null>(null);
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
   const [jsonData, setJsonData] = useState("");
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [previewDocumentHtml, setPreviewDocumentHtml] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -103,6 +107,7 @@ export default function TemplatePage({ params }: TemplatePageProps) {
           html: template.html,
           css: template.css,
           data: formData,
+          helpers: template.helpers,
         }),
       });
 
@@ -252,6 +257,21 @@ export default function TemplatePage({ params }: TemplatePageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter className="flex justify-end items-center gap-2">
+                  {template?.preview && template.preview === doc.id && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsPreviewModalOpen(true);
+                      }}
+                      title="Vista Previa"
+                      className="cursor-pointer"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="icon"
@@ -424,6 +444,32 @@ export default function TemplatePage({ params }: TemplatePageProps) {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Preview Document Dialog */}
+      <Dialog open={isPreviewModalOpen} onOpenChange={setIsPreviewModalOpen}>
+        <DialogContent className="sm:max-w-[800px] h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Vista Previa del Documento</DialogTitle>
+            <DialogDescription>
+              Aquí puedes ver la vista previa del documento generado para esta plantilla.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-grow overflow-auto border rounded-lg p-4 bg-white text-black">
+            {previewDocumentHtml ? (
+              <div dangerouslySetInnerHTML={{ __html: previewDocumentHtml }} />
+            ) : (
+              <p>Cargando vista previa...</p>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cerrar
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
